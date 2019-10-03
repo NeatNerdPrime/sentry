@@ -15,6 +15,7 @@ import PageHeading from 'app/components/pageHeading';
 import ProjectsStatsStore from 'app/stores/projectsStatsStore';
 import SentryTypes from 'app/sentryTypes';
 import getRouteStringFromRoutes from 'app/utils/getRouteStringFromRoutes';
+import profiler from 'app/utils/profiler';
 import space from 'app/styles/space';
 import withOrganization from 'app/utils/withOrganization';
 import withProjects from 'app/utils/withProjects';
@@ -139,4 +140,6 @@ const ProjectsHeader = styled('div')`
 `;
 
 export {Dashboard};
-export default withTeams(withProjects(withOrganization(OrganizationDashboard)));
+export default withTeams(
+  withProjects(withOrganization(profiler()(OrganizationDashboard)))
+);
