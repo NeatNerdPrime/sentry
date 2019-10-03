@@ -858,6 +858,14 @@ function routes() {
         component={errorHandler(LazyLoad)}
       />
 
+      <Route
+        path="/join-request/:orgId/"
+        componentPromise={() =>
+          import(/* webpackChunkName: "OrganizationJoinRequest" */ 'app/views/organizationJoinRequest')
+        }
+        component={errorHandler(LazyLoad)}
+      />
+
       <Route path="/onboarding/:orgId/" component={errorHandler(OrganizationContext)}>
         <IndexRedirect to="welcome/" />
         <Route

@@ -14,6 +14,7 @@ export type Organization = {
   projects: Project[];
   access: string[];
   features: string[];
+  teams: Team[];
 };
 
 export type OrganizationDetailed = Organization & {
@@ -343,7 +344,7 @@ export type EventViewv1 = {
   name: string;
   data: {
     fields: string[];
-    columnNames: string[];
+    fieldnames: string[];
     sort: string[];
     query?: string;
   };
@@ -481,4 +482,10 @@ export type Commit = {
   dateCreated: string;
   repository?: Repository;
   author?: User;
+};
+
+export type MemberRole = {
+  id: string;
+  name: string;
+  desc: string;
 };

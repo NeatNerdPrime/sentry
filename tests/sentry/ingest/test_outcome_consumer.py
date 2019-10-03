@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import logging
 import time
+import os
 import pytest
 import six.moves
 
@@ -12,7 +13,11 @@ from sentry.utils.outcomes import Outcome
 from django.conf import settings
 from sentry.utils import json
 
+from .ingest_utils import requires_kafka
+
 logger = logging.getLogger(__name__)
+
+SKIP_CONSUMER_TESTS = os.environ.get("SENTRY_RUN_CONSUMER_TESTS") != "1"
 
 
 def _get_event_id(base_event_id):
@@ -92,8 +97,11 @@ def _setup_outcome_test(kafka_producer, kafka_admin):
     return producer, project_id, topic_name
 
 
-@pytest.mark.skip(reason="extreamly slow test, reading the first kafka message takes many seconds")
+@pytest.mark.skipif(
+    SKIP_CONSUMER_TESTS, reason="slow test, reading the first kafka message takes many seconds"
+)
 @pytest.mark.django_db
+@requires_kafka
 def test_outcome_consumer_ignores_outcomes_already_handled(
     kafka_producer, task_runner, kafka_admin
 ):
@@ -145,8 +153,11 @@ def test_outcome_consumer_ignores_outcomes_already_handled(
     assert len(event_dropped_sink) == 0
 
 
-@pytest.mark.skip(reason="extreamly slow test, reading the first kafka message takes many seconds")
+@pytest.mark.skipif(
+    SKIP_CONSUMER_TESTS, reason="slow test, reading the first kafka message takes many seconds"
+)
 @pytest.mark.django_db
+@requires_kafka
 def test_outcome_consumer_ignores_invalid_outcomes(kafka_producer, task_runner, kafka_admin):
     producer, project_id, topic_name = _setup_outcome_test(kafka_producer, kafka_admin)
 
@@ -194,8 +205,11 @@ def test_outcome_consumer_ignores_invalid_outcomes(kafka_producer, task_runner, 
     assert len(event_dropped_sink) == 0
 
 
-@pytest.mark.skip(reason="extreamly slow test, reading the first kafka message takes many seconds")
+@pytest.mark.skipif(
+    SKIP_CONSUMER_TESTS, reason="slow test, reading the first kafka message takes many seconds"
+)
 @pytest.mark.django_db
+@requires_kafka
 def test_outcome_consumer_remembers_handled_outcomes(kafka_producer, task_runner, kafka_admin):
     producer, project_id, topic_name = _setup_outcome_test(kafka_producer, kafka_admin)
 
@@ -246,8 +260,11 @@ def test_outcome_consumer_remembers_handled_outcomes(kafka_producer, task_runner
     assert len(event_dropped_sink) == 0
 
 
-@pytest.mark.skip(reason="extreamly slow test, reading the first kafka message takes many seconds")
+@pytest.mark.skipif(
+    SKIP_CONSUMER_TESTS, reason="slow test, reading the first kafka message takes many seconds"
+)
 @pytest.mark.django_db
+@requires_kafka
 def test_outcome_consumer_handles_filtered_outcomes(kafka_producer, task_runner, kafka_admin):
     producer, project_id, topic_name = _setup_outcome_test(kafka_producer, kafka_admin)
 
@@ -296,8 +313,11 @@ def test_outcome_consumer_handles_filtered_outcomes(kafka_producer, task_runner,
     assert len(event_dropped_sink) == 0
 
 
-@pytest.mark.skip(reason="extreamly slow test, reading the first kafka message takes many seconds")
+@pytest.mark.skipif(
+    SKIP_CONSUMER_TESTS, reason="slow test, reading the first kafka message takes many seconds"
+)
 @pytest.mark.django_db
+@requires_kafka
 def test_outcome_consumer_handles_rate_limited_outcomes(kafka_producer, task_runner, kafka_admin):
     producer, project_id, topic_name = _setup_outcome_test(kafka_producer, kafka_admin)
 

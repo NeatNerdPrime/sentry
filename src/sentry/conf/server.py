@@ -816,8 +816,6 @@ SENTRY_FEATURES = {
     "organizations:create": True,
     # Enable the 'discover' interface.
     "organizations:discover": False,
-    # Enable the Discover v2 query builder
-    "organizations:discover-v2-query-builder": False,
     # Enable attaching arbitrary files to events.
     "organizations:event-attachments": False,
     # Allow organizations to configure built-in symbol sources.
@@ -934,23 +932,6 @@ SENTRY_MONITOR_API_ROOT = None
 SENTRY_CELERYBEAT_MONITORS = {
     # 'scheduled-name': 'monitor_guid',
 }
-
-# Only store a portion of all messages per unique group.
-SENTRY_SAMPLE_DATA = False
-
-# The following values control the sampling rates
-SENTRY_SAMPLE_RATES = (
-    # up until N events, store 1 in M
-    (50, 1),
-    (1000, 2),
-    (10000, 10),
-    (100000, 50),
-    (1000000, 300),
-    (10000000, 2000),
-)
-SENTRY_MAX_SAMPLE_RATE = 10000
-SENTRY_SAMPLE_TIMES = ((3600, 1), (360, 10), (60, 60))
-SENTRY_MAX_SAMPLE_TIME = 10000
 
 # Web Service
 SENTRY_WEB_HOST = "localhost"
@@ -1072,10 +1053,7 @@ SENTRY_NODESTORE_OPTIONS = {}
 
 # Tag storage backend
 _SENTRY_TAGSTORE_DEFAULT_MULTI_OPTIONS = {
-    "backends": [
-        ("sentry.tagstore.legacy.LegacyTagStorage", {}),
-        ("sentry.tagstore.v2.V2TagStorage", {}),
-    ],
+    "backends": [("sentry.tagstore.legacy.LegacyTagStorage", {})],
     "runner": "ImmediateRunner",
 }
 SENTRY_TAGSTORE = os.environ.get("SENTRY_TAGSTORE", "sentry.tagstore.legacy.LegacyTagStorage")
@@ -1547,7 +1525,7 @@ SENTRY_BUILTIN_SOURCES = {
         "id": "sentry:microsoft",
         "name": "Microsoft",
         "layout": {"type": "symstore"},
-        "filters": {"filetypes": ["pdb", "pe"], "path_patterns": ["?:/windows/**"]},
+        "filters": {"filetypes": ["pdb", "pe"]},
         "url": "https://msdl.microsoft.com/download/symbols/",
         "is_public": True,
     },
