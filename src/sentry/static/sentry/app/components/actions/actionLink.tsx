@@ -58,9 +58,7 @@ export default class ActionLink extends React.Component<ActionLinkProps> {
     }
   }
 }
-
-const ActionLinkAnchor = styled('a')<{
-  disabled?: boolean;
-}>`
+const ActionLinkAnchor = styled('a')<{disabled?: boolean}>`
   pointer-events: ${p => (p.disabled ? 'none' : 'auto')};
+  pointer-events: none;
 `;
