@@ -88,7 +88,7 @@
     "classnames": "2.3.1",
     "color": "^4.2.3",
     "compression-webpack-plugin": "10.0.0",
-    "copy-text-to-clipboard": "3.0.1",
+    "copy-text-to-clipboard": "3.1.0",
     "copy-webpack-plugin": "^11.0.0",
     "core-js": "^3.23.3",
     "crypto-browserify": "^3.12.0",
