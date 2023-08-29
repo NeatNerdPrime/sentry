@@ -2418,12 +2418,12 @@
     "@react-types/overlays" "^3.6.4"
     "@react-types/shared" "^3.15.0"
 
-"@react-types/numberfield@^3.1.0", "@react-types/numberfield@^3.3.5":
-  version "3.3.5"
-  resolved "https://registry.yarnpkg.com/@react-types/numberfield/-/numberfield-3.3.5.tgz#423aced559f7431e88b7988bf7e2cb3870fcdb1c"
-  integrity sha512-qBhUSkahiIeTW5IvKvyfLtVHgzyqwKfuDIOlJQiBwgrOPR96X8KDDsOib4r5SFv0lhibv0gQ5L5ucXbmwLyQ8A==
+"@react-types/numberfield@^3.1.0", "@react-types/numberfield@^3.3.5", "@react-types/numberfield@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@react-types/numberfield/-/numberfield-3.5.0.tgz#f069848035a7e989c3876fa47013c8691b045f08"
+  integrity sha512-uKN6uJCJICIvngk3d2AzD/XU+LZHSriALpsM58l6Zy7xmVu3Wdb11WeWL9z/cwJ+KAdt4tcD+rCE/Y2rcfjWDA==
   dependencies:
-    "@react-types/shared" "^3.16.0"
+    "@react-types/shared" "^3.19.0"
 
 "@react-types/overlays@^3.5.1":
   version "3.5.1"
@@ -2439,10 +2439,10 @@
   dependencies:
     "@react-types/shared" "^3.15.0"
 
-"@react-types/shared@^3.10.0", "@react-types/shared@^3.15.0", "@react-types/shared@^3.16.0", "@react-types/shared@^3.8.0", "@react-types/shared@^3.9.0":
-  version "3.16.0"
-  resolved "https://registry.yarnpkg.com/@react-types/shared/-/shared-3.16.0.tgz#cab7bf0376969d1773480ecb2d6da5aa91391db5"
-  integrity sha512-IQgU4oAEvMwylEvaTsr2XB1G/mAoMe1JFYLD6G78v++oAR9l8o9MQxZ0YSeANDkqTamb2gKezGoT1RxvSKjVxw==
+"@react-types/shared@^3.10.0", "@react-types/shared@^3.15.0", "@react-types/shared@^3.16.0", "@react-types/shared@^3.19.0", "@react-types/shared@^3.8.0", "@react-types/shared@^3.9.0":
+  version "3.19.0"
+  resolved "https://registry.yarnpkg.com/@react-types/shared/-/shared-3.19.0.tgz#060e547d6e8c3ec84043d62f61cada1a00df1348"
+  integrity sha512-h852l8bWhqUxbXIG8vH3ab7gE19nnP3U1kuWf6SNSMvgmqjiRN9jXKPIFxF/PbfdvnXXm0yZSgSMWfUCARF0Cg==
 
 "@react-types/tabs@^3.1.5":
   version "3.1.5"
