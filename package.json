@@ -218,7 +218,7 @@
     "webpack-dev-server": "^4.9.2"
   },
   "optionalDependencies": {
-    "fsevents": "^2.3.2"
+    "fsevents": "^2.3.3"
   },
   "resolutions": {
     "**/ua-parser-js": "<=0.7.28",
