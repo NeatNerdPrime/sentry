@@ -4076,10 +4076,10 @@
     "@types/react" "*"
     date-fns "^2.16.1"
 
-"@types/react-document-title@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@types/react-document-title/-/react-document-title-2.0.5.tgz#5093e25420c918066bb94efff1cb08a894289cce"
-  integrity sha512-EZ8uj09zBkqkKms2i0OPVYBb4iOLg+GWG1GegDOIDurQqJz+dc2ZMtJU+bgxmm01BjqHYq38XRj0/eC1kChLIw==
+"@types/react-document-title@^2.0.9":
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/@types/react-document-title/-/react-document-title-2.0.9.tgz#65fd57e6086ef8ced5ad45ac8a439dd878ca71d6"
+  integrity sha512-Q8bSnESgyVoMCo0vAKJj2N4wD/yl7EnutaFntKpaL/edUUo4kTNH8M6A5iCoje9sknRdLx7cfB39cpdTNr5Z+Q==
   dependencies:
     "@types/react" "*"
 
