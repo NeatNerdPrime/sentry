@@ -14858,10 +14858,10 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
-tocbot@^4.18.2:
-  version "4.18.2"
-  resolved "https://registry.yarnpkg.com/tocbot/-/tocbot-4.18.2.tgz#e98bb4120fae02f0e4a01d3acff03f3db2ba3ad9"
-  integrity sha512-bWUfEYQZ4oFgT+qZYvzlTgbsTmA645ApHbo1iRaOBUeFfy5IpctgAQQjCXbPZy+4RDZ1JJYlIBgoApZMzMaYog==
+tocbot@^4.27.16:
+  version "4.27.16"
+  resolved "https://registry.yarnpkg.com/tocbot/-/tocbot-4.27.16.tgz#41f6f708fdec2f5ece2754ddd934d9e1c364548c"
+  integrity sha512-ZE+suY5GpDRSkxP3zza2BdPVQPHtBP+Ip1RZod/hha5jWMeLHiwjQ0tSMCRymlZP75aIOMobAAupDjWZxTJRUA==
 
 toidentifier@1.0.1:
   version "1.0.1"
