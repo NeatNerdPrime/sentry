@@ -3088,6 +3088,13 @@
     core-js "^3.8.2"
     global "^4.4.0"
 
+"@storybook/client-logger@8.1.11":
+  version "8.1.11"
+  resolved "https://registry.yarnpkg.com/@storybook/client-logger/-/client-logger-8.1.11.tgz#4fbf660869466d5faff89827ac9dee2fc1a084b0"
+  integrity sha512-DVMh2usz3yYmlqCLCiCKy5fT8/UR9aTh+gSqwyNFkGZrIM4otC5A8eMXajXifzotQLT5SaOEnM3WzHwmpvMIEA==
+  dependencies:
+    "@storybook/global" "^5.0.0"
+
 "@storybook/components@6.5.14", "@storybook/components@^6.0.0":
   version "6.5.14"
   resolved "https://registry.yarnpkg.com/@storybook/components/-/components-6.5.14.tgz#e4d35b689674a16d88d0d16f50319865387497dd"
@@ -3290,6 +3297,11 @@
     lodash "^4.17.21"
     regenerator-runtime "^0.13.7"
 
+"@storybook/global@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@storybook/global/-/global-5.0.0.tgz#b793d34b94f572c1d7d9e0f44fac4e0dbc9572ed"
+  integrity sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==
+
 "@storybook/manager-webpack4@6.5.14":
   version "6.5.14"
   resolved "https://registry.yarnpkg.com/@storybook/manager-webpack4/-/manager-webpack4-6.5.14.tgz#92cd3d34b9e28d7edd215b1e79b1f0757fb66eba"
@@ -3490,6 +3502,15 @@
     memoizerific "^1.11.3"
     qs "^6.10.0"
     regenerator-runtime "^0.13.7"
+
+"@storybook/router@8.1.11":
+  version "8.1.11"
+  resolved "https://registry.yarnpkg.com/@storybook/router/-/router-8.1.11.tgz#7e4d04d854f4935586fe298611f572e6a3ccb551"
+  integrity sha512-nU5lsBvy0L8wBYOkjagh29ztZicDATpZNYrHuavlhQ2jznmmHdJvXKYk+VrMAbthjQ6ZBqfeeMNPR1UlnqR5Rw==
+  dependencies:
+    "@storybook/client-logger" "8.1.11"
+    memoizerific "^1.11.3"
+    qs "^6.10.0"
 
 "@storybook/semver@^7.3.2":
   version "7.3.2"
