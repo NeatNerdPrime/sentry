@@ -39,7 +39,7 @@ export const ShortId = styled('div')`
 export const EventDrawerContainer = styled('div')`
   height: 100%;
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: max-content max-content auto;
 `;
 
 export const EventDrawerHeader = styled(DrawerHeader)`
@@ -69,6 +69,9 @@ export const EventDrawerBody = styled(DrawerBody)`
   overscroll-behavior: contain;
   /* Move the scrollbar to the left edge */
   scroll-margin: 0 ${space(2)};
+  display: flex;
+  gap: ${space(2)};
+  flex-direction: column;
   direction: rtl;
   * {
     direction: ltr;

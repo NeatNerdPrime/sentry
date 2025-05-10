@@ -54,7 +54,7 @@ from sentry.grouping.api import (
     get_grouping_config_dict_for_project,
 )
 from sentry.grouping.grouptype import ErrorGroupType
-from sentry.grouping.ingest.config import is_in_transition, update_grouping_config_if_needed
+from sentry.grouping.ingest.config import is_in_transition, update_or_set_grouping_config_if_needed
 from sentry.grouping.ingest.hashing import (
     find_grouphash_with_group,
     get_or_create_grouphashes,
@@ -88,7 +88,7 @@ from sentry.models.groupenvironment import GroupEnvironment
 from sentry.models.grouphash import GroupHash
 from sentry.models.grouphistory import GroupHistoryStatus, record_group_history
 from sentry.models.grouplink import GroupLink
-from sentry.models.groupopenperiod import GroupOpenPeriod
+from sentry.models.groupopenperiod import GroupOpenPeriod, has_initial_open_period
 from sentry.models.grouprelease import GroupRelease
 from sentry.models.groupresolution import GroupResolution
 from sentry.models.organization import Organization
@@ -1247,7 +1247,7 @@ def assign_event_to_group(
     # hashes, we're free to perform a config update if needed. Future events will use the new
     # config, but will also be grandfathered into the current config for a week, so as not to
     # erroneously create new groups.
-    update_grouping_config_if_needed(project, "ingest")
+    update_or_set_grouping_config_if_needed(project, "ingest")
 
     # The only way there won't be group info is we matched to a performance, cron, replay, or
     # other-non-error-type group because of a hash collision - exceedingly unlikely, and not
@@ -1715,7 +1715,9 @@ def _handle_regression(group: Group, event: BaseEvent, release: Release | None) 
         kick_off_status_syncs.apply_async(
             kwargs={"project_id": group.project_id, "group_id": group.id}
         )
-        if features.has("organizations:issue-open-periods", group.project.organization):
+        if features.has(
+            "organizations:issue-open-periods", group.project.organization
+        ) and has_initial_open_period(group):
             GroupOpenPeriod.objects.create(
                 group=group,
                 project_id=group.project_id,

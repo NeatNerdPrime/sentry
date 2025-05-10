@@ -1,4 +1,5 @@
 import {Fragment, useEffect, useState} from 'react';
+import {css} from '@emotion/react';
 import styled from '@emotion/styled';
 
 import {SeerLoadingIcon, SeerWaitingIcon} from 'sentry/components/ai/SeerIcon';
@@ -68,9 +69,11 @@ const ProgressBarContainer = styled('div')<{hasData: boolean}>`
 
   ${p =>
     p.hasData &&
-    `&:hover {
-      height: 30px;
-    }`}
+    css`
+      &:hover {
+        height: 30px;
+      }
+    `}
 `;
 
 const ProgressBarWrapper = styled('div')`
@@ -88,7 +91,7 @@ const ProgressBarTrack = styled('div')`
 
 const ProgressBarFill = styled('div')`
   height: 100%;
-  background-color: ${p => p.theme.pink200};
+  background-color: ${p => p.theme.pink400};
   transition: width 1s ease-in-out;
 `;
 
@@ -110,10 +113,11 @@ const ProgressBarHoverContent = styled('div')<{hasData: boolean}>`
 
   ${p =>
     p.hasData &&
-    `
-    ${ProgressBarContainer}:hover & {
-      opacity: 1;
-    }`}
+    css`
+      ${ProgressBarContainer}:hover & {
+        opacity: 1;
+      }
+    `}
 `;
 
 const ProgressText = styled('span')`

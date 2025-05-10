@@ -12,7 +12,6 @@ import {useLogsPageData} from 'sentry/views/explore/contexts/logs/logsPageData';
 import {TraceContextPanel} from 'sentry/views/performance/newTraceDetails/traceContextPanel';
 import {TraceViewLogsDataProvider} from 'sentry/views/performance/newTraceDetails/traceOurlogs';
 import {TraceWaterfall} from 'sentry/views/performance/newTraceDetails/traceWaterfall';
-import {useHasTraceNewUi} from 'sentry/views/performance/newTraceDetails/useHasTraceNewUi';
 import {useTraceWaterfallModels} from 'sentry/views/performance/newTraceDetails/useTraceWaterfallModels';
 import {useTraceWaterfallScroll} from 'sentry/views/performance/newTraceDetails/useTraceWaterfallScroll';
 
@@ -22,7 +21,7 @@ import {useTraceRootEvent} from './traceApi/useTraceRootEvent';
 import {useTraceTree} from './traceApi/useTraceTree';
 import {
   DEFAULT_TRACE_VIEW_PREFERENCES,
-  loadTraceViewPreferences,
+  getInitialTracePreferences,
 } from './traceState/tracePreferences';
 import {TraceStateProvider} from './traceState/traceStateProvider';
 import {TraceMetaDataHeader} from './traceHeader';
@@ -42,14 +41,18 @@ function decodeTraceSlug(maybeSlug: string | undefined): string {
   return maybeSlug.trim();
 }
 
+export const TRACE_VIEW_PREFERENCES_KEY = 'trace-waterfall-preferences';
+
 export function TraceView() {
   const params = useParams<{traceSlug?: string}>();
   const traceSlug = useMemo(() => decodeTraceSlug(params.traceSlug), [params.traceSlug]);
 
   const preferences = useMemo(
     () =>
-      loadTraceViewPreferences('trace-view-preferences') ||
-      DEFAULT_TRACE_VIEW_PREFERENCES,
+      getInitialTracePreferences(
+        TRACE_VIEW_PREFERENCES_KEY,
+        DEFAULT_TRACE_VIEW_PREFERENCES
+      ),
     []
   );
 
@@ -57,7 +60,7 @@ export function TraceView() {
     <TraceViewLogsDataProvider traceSlug={traceSlug}>
       <TraceStateProvider
         initialPreferences={preferences}
-        preferencesStorageKey="trace-view-preferences"
+        preferencesStorageKey={TRACE_VIEW_PREFERENCES_KEY}
       >
         <TraceViewImpl traceSlug={traceSlug} />
       </TraceStateProvider>
@@ -69,14 +72,17 @@ function TraceViewImpl({traceSlug}: {traceSlug: string}) {
   const organization = useOrganization();
   const queryParams = useTraceQueryParams();
   const traceEventView = useTraceEventView(traceSlug, queryParams);
-  const hasTraceNewUi = useHasTraceNewUi();
   const logsTableData = useLogsPageData();
   const hideTraceWaterfallIfEmpty = logsTableData?.logsData?.data?.length > 0;
 
   const meta = useTraceMeta([{traceSlug, timestamp: queryParams.timestamp}]);
   const trace = useTrace({traceSlug, timestamp: queryParams.timestamp});
-  const rootEvent = useTraceRootEvent(trace.data ?? null);
   const tree = useTraceTree({traceSlug, trace, meta, replay: null});
+  const rootEventResults = useTraceRootEvent({
+    tree,
+    logs: logsTableData?.logsData?.data,
+    traceId: traceSlug,
+  });
 
   const traceWaterfallModels = useTraceWaterfallModels();
   const traceWaterfallScroll = useTraceWaterfallScroll({
@@ -94,7 +100,7 @@ function TraceViewImpl({traceSlug}: {traceSlug: string}) {
         <NoProjectMessage organization={organization}>
           <TraceExternalLayout>
             <TraceMetaDataHeader
-              rootEventResults={rootEvent}
+              rootEventResults={rootEventResults}
               tree={tree}
               metaResults={meta}
               organization={organization}
@@ -109,7 +115,7 @@ function TraceViewImpl({traceSlug}: {traceSlug: string}) {
                 meta={meta}
                 replay={null}
                 source="performance"
-                rootEvent={rootEvent}
+                rootEventResults={rootEventResults}
                 traceSlug={traceSlug}
                 traceEventView={traceEventView}
                 organization={organization}
@@ -117,13 +123,13 @@ function TraceViewImpl({traceSlug}: {traceSlug: string}) {
                 traceWaterfallScrollHandlers={traceWaterfallScroll}
                 traceWaterfallModels={traceWaterfallModels}
               />
-              {hasTraceNewUi && (
-                <TraceContextPanel
-                  tree={tree}
-                  rootEvent={rootEvent}
-                  onScrollToNode={traceWaterfallScroll.onScrollToNode}
-                />
-              )}
+              <TraceContextPanel
+                traceSlug={traceSlug}
+                tree={tree}
+                rootEventResults={rootEventResults}
+                onScrollToNode={traceWaterfallScroll.onScrollToNode}
+                logs={logsTableData.logsData?.data}
+              />
             </TraceInnerLayout>
           </TraceExternalLayout>
         </NoProjectMessage>
@@ -149,6 +155,4 @@ const TraceInnerLayout = styled('div')`
   padding: ${space(2)} ${space(3)};
   overflow-y: scroll;
   margin-bottom: ${space(1)};
-
-  background-color: ${p => p.theme.background};
 `;

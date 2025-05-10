@@ -1,3 +1,4 @@
+import {css} from '@emotion/react';
 import styled from '@emotion/styled';
 
 import {Flex} from 'sentry/components/container/flex';
@@ -11,7 +12,6 @@ import {TypeCell} from 'sentry/components/workflowEngine/gridCell/typeCell';
 import {UserCell} from 'sentry/components/workflowEngine/gridCell/userCell';
 import {space} from 'sentry/styles/space';
 import type {Group} from 'sentry/types/group';
-import type {AvatarProject} from 'sentry/types/project';
 import type {Detector} from 'sentry/types/workflowEngine/detectors';
 
 interface DetectorListRowProps {
@@ -21,15 +21,11 @@ interface DetectorListRowProps {
 }
 
 export function DetectorListRow({
-  detector: {workflowIds, id, name, disabled},
+  detector: {workflowIds, id, name, disabled, projectId},
   handleSelect,
   selected,
 }: DetectorListRowProps) {
   const link = `/issues/monitors/${id}/`;
-  const project: AvatarProject = {
-    slug: name,
-    platform: 'javascript-astro',
-  };
   const issues: Group[] = [];
   return (
     <RowWrapper disabled={disabled}>
@@ -44,7 +40,7 @@ export function DetectorListRow({
         <CellWrapper>
           <StyledTitleCell
             name={name}
-            project={project}
+            projectId={projectId}
             link={link}
             disabled={disabled}
           />
@@ -103,7 +99,7 @@ const RowWrapper = styled('div')<{disabled?: boolean}>`
 
   ${p =>
     p.disabled &&
-    `
+    css`
       ${CellWrapper}, ${StyledGraphCell} {
         opacity: 0.6;
       }
