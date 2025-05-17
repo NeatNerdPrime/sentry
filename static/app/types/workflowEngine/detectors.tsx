@@ -3,9 +3,16 @@ import type {
   DataSource,
 } from 'sentry/types/workflowEngine/dataConditions';
 
-export type DetectorType = 'metric' | 'crons' | 'uptime';
+export type DetectorType =
+  | 'crons'
+  | 'errors'
+  | 'metric'
+  | 'performance'
+  | 'replay'
+  | 'trace'
+  | 'uptime';
 
-export interface NewDetector {
+interface NewDetector {
   config: Record<string, unknown>;
   dataCondition: DataConditionGroup;
   dataSource: DataSource;
@@ -17,8 +24,9 @@ export interface NewDetector {
 }
 
 export interface Detector extends Readonly<NewDetector> {
-  readonly dateCreated: Date;
-  readonly dateUpdated: Date;
+  readonly createdBy: string;
+  readonly dateCreated: string;
+  readonly dateUpdated: string;
   readonly id: string;
-  readonly lastTriggered: Date;
+  readonly lastTriggered: string;
 }

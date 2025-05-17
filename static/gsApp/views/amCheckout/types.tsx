@@ -16,6 +16,8 @@ type BaseCheckoutData = {
   applyNow?: boolean;
   onDemandBudget?: OnDemandBudgets;
   onDemandMaxSpend?: number;
+  seerBudget?: number;
+  seerEnabled?: boolean;
 };
 
 export type CheckoutFormData = BaseCheckoutData & {
@@ -26,6 +28,7 @@ export type CheckoutAPIData = BaseCheckoutData & {
   paymentIntent?: string;
   previewToken?: string;
   referrer?: string;
+  // TODO(data categories): check if these can be parsed
   reservedAttachments?: number;
   reservedErrors?: number;
   reservedMonitorSeats?: number;
@@ -34,6 +37,7 @@ export type CheckoutAPIData = BaseCheckoutData & {
   reservedSpans?: number;
   reservedTransactions?: number;
   reservedUptime?: number;
+  seer?: boolean;
 };
 
 export type StepProps = {

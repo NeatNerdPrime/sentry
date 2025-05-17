@@ -1,6 +1,6 @@
-import type {Action} from './actions';
+import type {NewAction} from './actions';
 
-export interface SnubaQuery {
+interface SnubaQuery {
   aggregate: string;
   dataset: string;
   id: string;
@@ -43,6 +43,7 @@ export enum DataConditionType {
   REAPPEARED_EVENT = 'reappeared_event',
   TAGGED_EVENT = 'tagged_event',
   ISSUE_PRIORITY_EQUALS = 'issue_priority_equals',
+  ISSUE_PRIORITY_GREATER_OR_EQUAL = 'issue_priority_greater_or_equal',
 
   // frequency
   EVENT_FREQUENCY_COUNT = 'event_frequency_count',
@@ -53,6 +54,11 @@ export enum DataConditionType {
   PERCENT_SESSIONS_PERCENT = 'percent_sessions_percent',
   EVENT_UNIQUE_USER_FREQUENCY_WITH_CONDITIONS_COUNT = 'event_unique_user_frequency_with_conditions_count',
   EVENT_UNIQUE_USER_FREQUENCY_WITH_CONDITIONS_PERCENT = 'event_unique_user_frequency_with_conditions_percent',
+
+  // frequency types for UI only
+  EVENT_FREQUENCY = 'event_frequency',
+  EVENT_UNIQUE_USER_FREQUENCY = 'event_unique_user_frequency',
+  PERCENT_SESSIONS = 'percent_sessions',
 }
 
 export enum DataConditionGroupLogicType {
@@ -62,18 +68,20 @@ export enum DataConditionGroupLogicType {
   NONE = 'none',
 }
 
-export interface DataCondition {
+export interface NewDataCondition {
   comparison: any;
   comparison_type: DataConditionType;
-  condition_group: DataConditionGroup;
-  condition_result: any;
-  id: string;
-  type: DataConditionGroupLogicType;
+  condition_group?: DataConditionGroup;
+  condition_result?: any;
+}
+
+export interface DataCondition extends Readonly<NewDataCondition> {
+  readonly id: string;
 }
 
 export interface DataConditionGroup {
-  conditions: Array<Omit<DataCondition, 'condition_group' | 'type' | 'id'>>;
+  conditions: NewDataCondition[];
   id: string;
   logicType: DataConditionGroupLogicType;
-  actions?: Action[];
+  actions?: NewAction[];
 }

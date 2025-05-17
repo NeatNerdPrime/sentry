@@ -95,11 +95,7 @@ class OrganizationEventsMetaEndpoint(OrganizationEventsEndpointBase):
                 # query_source=(
                 #     QuerySource.FRONTEND if is_frontend_request(request) else QuerySource.API
                 # ),
-                fallback_to_transactions=features.has(
-                    "organizations:performance-discover-dataset-selector",
-                    organization,
-                    actor=request.user,
-                ),
+                fallback_to_transactions=True,
             )
 
         return Response({"count": result["data"][0]["count"]})
@@ -182,13 +178,18 @@ class OrganizationSpansSamplesEndpoint(OrganizationEventsV2EndpointBase):
         except NoProjects:
             return Response({})
 
-        use_rpc = request.GET.get("useRpc", "0") == "1"
+        # TODO: remove useRpc param
+        use_eap = (
+            request.GET.get("useRpc", "0") == "1" or request.GET.get("dataset", None) == "spans"
+        )
         orderby = self.get_orderby(request) or ["timestamp"]
 
-        if use_rpc:
+        if use_eap:
             result = get_eap_span_samples(request, snuba_params, orderby)
+            dataset = spans_rpc
         else:
             result = get_span_samples(request, snuba_params, orderby)
+            dataset = spans_indexed
 
         return Response(
             self.handle_results_with_meta(
@@ -197,7 +198,7 @@ class OrganizationSpansSamplesEndpoint(OrganizationEventsV2EndpointBase):
                 snuba_params.project_ids,
                 {"data": result["data"], "meta": result["meta"]},
                 True,
-                spans_indexed,
+                dataset,
             )
         )
 
@@ -311,7 +312,7 @@ def get_eap_span_samples(request: Request, snuba_params: SnubaParams, orderby: l
         config=SearchResolverConfig(),
         offset=0,
         limit=100,
-        sampling_mode=None,
+        sampling_mode=snuba_params.sampling_mode,
         orderby=["-profile.id"],
         referrer=Referrer.API_SPAN_SAMPLE_GET_SPAN_IDS.value,
         selected_columns=[
@@ -343,7 +344,7 @@ def get_eap_span_samples(request: Request, snuba_params: SnubaParams, orderby: l
         config=SearchResolverConfig(use_aggregate_conditions=False),
         offset=0,
         limit=9,
-        sampling_mode=None,
+        sampling_mode=snuba_params.sampling_mode,
         query_string=samples_query_string,
         orderby=orderby,
         referrer=Referrer.API_SPAN_SAMPLE_GET_SPAN_DATA.value,

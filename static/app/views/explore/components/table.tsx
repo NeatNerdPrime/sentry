@@ -13,24 +13,16 @@ import {
   GridHead,
   GridHeadCell,
   GridRow,
-  Header,
-  HeaderButtonContainer,
-  HeaderTitle,
 } from 'sentry/components/gridEditable/styles';
 import {space} from 'sentry/styles/space';
 import {defined} from 'sentry/utils';
 import {Actions} from 'sentry/views/discover/table/cellAction';
 
-interface TableProps extends React.ComponentProps<typeof _TableWrapper> {}
-
-export function Table({
-  ref,
-  children,
-  styles,
-  ...props
-}: TableProps & {
+interface TableProps extends React.ComponentProps<typeof _TableWrapper> {
   ref?: React.Ref<HTMLTableElement>;
-}) {
+}
+
+export function Table({ref, children, styles, ...props}: TableProps) {
   return (
     <_TableWrapper {...props}>
       <_Table ref={ref} style={styles}>
@@ -164,9 +156,6 @@ export const TableRow = GridRow;
 export const TableBodyCell = GridBodyCell;
 
 export const TableHead = GridHead;
-export const TableHeader = Header;
-export const TableHeaderActions = HeaderButtonContainer;
-export const TableHeaderTitle = HeaderTitle;
 export const TableHeadCell = styled(GridHeadCell)<{align?: Alignments}>`
   ${p => p.align && `justify-content: ${p.align};`}
 `;

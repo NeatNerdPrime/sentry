@@ -65,7 +65,7 @@ interface BaseConfig {
 /**
  * The configuration object used when the schedule is a CRONTAB
  */
-export interface CrontabConfig extends BaseConfig {
+interface CrontabConfig extends BaseConfig {
   /**
    * The crontab schedule
    */
@@ -89,12 +89,12 @@ export interface IntervalConfig extends BaseConfig {
 
 export type MonitorConfig = CrontabConfig | IntervalConfig;
 
-export interface MonitorEnvBrokenDetection {
+interface MonitorEnvBrokenDetection {
   environmentMutedTimestamp: string;
   userNotifiedTimestamp: string;
 }
 
-export interface MonitorIncident {
+interface MonitorIncident {
   brokenNotice: MonitorEnvBrokenDetection | null;
   resolvingTimestamp: string;
   startingTimestamp: string;
@@ -142,13 +142,13 @@ export interface MonitorStat {
 
 export interface CheckIn {
   /**
-   * Date the opening check-in was sent
+   * Date the opening check-in was received.
    */
-  dateCreated: string;
+  dateAdded: string;
   /**
    * Duration (in milliseconds)
    */
-  duration: number;
+  duration: number | null;
   /**
    * environment the check-in was sent to
    */
