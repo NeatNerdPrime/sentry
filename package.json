@@ -169,9 +169,9 @@
     "typescript": "^5.8.3",
     "u2f-api": "1.0.10",
     "url-loader": "^4.1.1",
-    "webpack": "5.94.0",
-    "webpack-cli": "5.1.4",
-    "webpack-remove-empty-scripts": "^1.0.4",
+    "webpack": "5.99.9",
+    "webpack-cli": "6.0.1",
+    "webpack-remove-empty-scripts": "^1.1.1",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
