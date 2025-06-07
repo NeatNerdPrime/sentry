@@ -48,7 +48,6 @@ class NPlusOneDBSpanDetector(PerformanceDetector):
     """
 
     __slots__ = (
-        "stored_problems",
         "potential_parents",
         "source_span",
         "n_hash",
@@ -62,7 +61,6 @@ class NPlusOneDBSpanDetector(PerformanceDetector):
     def __init__(self, settings: dict[DetectorType, Any], event: dict[str, Any]) -> None:
         super().__init__(settings, event)
 
-        self.stored_problems = {}
         self.potential_parents = {}
         self.n_hash: str | None = None
         self.n_spans: list[Span] = []
@@ -264,31 +262,6 @@ class NPlusOneDBSpanDetector(PerformanceDetector):
             (str(parent_op) + str(parent_hash) + str(source_hash) + str(n_hash)).encode("utf8"),
         ).hexdigest()
         return f"1-{problem_class}-{full_fingerprint}"
-
-
-class NPlusOneDBSpanDetectorExtended(NPlusOneDBSpanDetector):
-    """
-    Detector goals:
-    - Extend N+1 DB Detector to make it compatible with more frameworks.
-    """
-
-    type = DetectorType.N_PLUS_ONE_DB_QUERIES_EXTENDED
-
-    __slots__ = (
-        "stored_problems",
-        "potential_parents",
-        "source_span",
-        "n_hash",
-        "n_spans",
-    )
-
-    def is_creation_allowed_for_organization(self, organization: Organization | None) -> bool:
-        # Only collecting metrics.
-        return False
-
-    def is_creation_allowed_for_project(self, project: Project | None) -> bool:
-        # Only collecting metrics.
-        return False
 
 
 def contains_complete_query(span: Span, is_source: bool | None = False) -> bool:

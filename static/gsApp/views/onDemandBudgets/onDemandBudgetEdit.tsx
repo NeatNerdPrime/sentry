@@ -5,9 +5,9 @@ import styled from '@emotion/styled';
 import {Tag} from 'sentry/components/core/badge/tag';
 import {Input} from 'sentry/components/core/input';
 import {Radio} from 'sentry/components/core/radio';
+import {Tooltip} from 'sentry/components/core/tooltip';
 import PanelBody from 'sentry/components/panels/panelBody';
 import PanelItem from 'sentry/components/panels/panelItem';
-import {Tooltip} from 'sentry/components/tooltip';
 import {DATA_CATEGORY_INFO} from 'sentry/constants';
 import {t, tct} from 'sentry/locale';
 import {space} from 'sentry/styles/space';
@@ -18,7 +18,7 @@ import TextBlock from 'sentry/views/settings/components/text/textBlock';
 import {CronsOnDemandStepWarning} from 'getsentry/components/cronsOnDemandStepWarning';
 import type {OnDemandBudgets, Plan, Subscription} from 'getsentry/types';
 import {OnDemandBudgetMode, PlanTier} from 'getsentry/types';
-import {displayBudgetName} from 'getsentry/utils/billing';
+import {displayBudgetName, getOnDemandCategories} from 'getsentry/utils/billing';
 import {getPlanCategoryName, listDisplayNames} from 'getsentry/utils/dataCategory';
 
 function coerceValue(value: number): number {
@@ -117,7 +117,7 @@ class OnDemandBudgetEdit extends Component<Props> {
     ) {
       return (
         <InputFields>
-          {activePlan.onDemandCategories.map(category => {
+          {getOnDemandCategories(activePlan).map(category => {
             const categoryBudgetKey = `${category}Budget`;
             const displayName = getPlanCategoryName({plan: activePlan, category});
             return (
@@ -141,7 +141,6 @@ class OnDemandBudgetEdit extends Component<Props> {
                         pattern="[0-9]*"
                         maxLength={7}
                         placeholder="e.g. 50"
-                        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                         value={coerceValue(onDemandBudget.budgets[category] ?? 0)}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           const inputValue = parseInputValue(e);
@@ -189,7 +188,7 @@ class OnDemandBudgetEdit extends Component<Props> {
     const selectedBudgetMode = onDemandBudget.budgetMode;
     const oxfordCategories = listDisplayNames({
       plan: activePlan,
-      categories: activePlan.onDemandCategories,
+      categories: getOnDemandCategories(activePlan),
     });
 
     if (subscription.planDetails.budgetTerm === 'pay-as-you-go') {

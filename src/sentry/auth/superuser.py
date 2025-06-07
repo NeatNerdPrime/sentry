@@ -15,10 +15,11 @@ import ipaddress
 import logging
 from collections.abc import Container
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, TypeIs, overload
 
 import orjson
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.core.signing import BadSignature
 from django.http import HttpRequest
 from django.utils import timezone as django_timezone
@@ -34,6 +35,8 @@ from sentry.auth.system import is_system_auth
 from sentry.data_secrecy.data_secrecy_logic import should_allow_superuser_access
 from sentry.models.organization import Organization
 from sentry.organizations.services.organization import RpcUserOrganizationContext
+from sentry.types.request import _HttpRequestWithUser, _RequestWithUser
+from sentry.users.models.user import User
 from sentry.utils import metrics
 from sentry.utils.auth import has_completed_sso
 from sentry.utils.settings import is_self_hosted
@@ -103,7 +106,7 @@ def get_superuser_scopes(
 
 
 def superuser_has_permission(
-    request: HttpRequest | Request, permissions: Container[str] | None = None
+    request: HttpRequest, permissions: Container[str] | None = None
 ) -> bool:
     """
     This is used in place of is_active_superuser() in APIs / permission classes.
@@ -138,7 +141,15 @@ def superuser_has_permission(
     return request.method == "GET" or request.method == "OPTIONS"
 
 
-def is_active_superuser(request: HttpRequest | Request) -> bool:
+@overload
+def is_active_superuser(request: Request) -> TypeIs[_RequestWithUser]: ...
+
+
+@overload
+def is_active_superuser(request: HttpRequest) -> TypeIs[_HttpRequestWithUser]: ...
+
+
+def is_active_superuser(request: HttpRequest) -> bool:
     if is_system_auth(getattr(request, "auth", None)):
         return True
     su = getattr(request, "superuser", None) or Superuser(request)
@@ -185,7 +196,7 @@ class Superuser(ElevatedMode):
         self._populate(current_datetime=current_datetime)
 
     @staticmethod
-    def _needs_validation():
+    def _needs_validation() -> bool:
         self_hosted = is_self_hosted()
         logger.info(
             "superuser.needs-validation",
@@ -403,8 +414,8 @@ class Superuser(ElevatedMode):
 
     def set_logged_in(
         self,
-        user,
-        current_datetime=None,
+        user: User | AnonymousUser,
+        current_datetime: datetime | None = None,
         prefilled_su_modal=None,
     ) -> None:
         """

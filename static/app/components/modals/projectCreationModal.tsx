@@ -13,23 +13,27 @@ import {
 import type {ModalRenderProps} from 'sentry/actionCreators/modal';
 import {Button} from 'sentry/components/core/button';
 import {Input} from 'sentry/components/core/input';
-import type {SupportedLanguages} from 'sentry/components/onboarding/frameworkSuggestionModal';
 import PlatformPicker, {
   type Category,
   type Platform,
 } from 'sentry/components/platformPicker';
+import type {TeamOption} from 'sentry/components/teamSelector';
 import TeamSelector from 'sentry/components/teamSelector';
 import {t} from 'sentry/locale';
 import ProjectsStore from 'sentry/stores/projectsStore';
 import {space} from 'sentry/styles/space';
 import type {OnboardingSelectedSDK} from 'sentry/types/onboarding';
 import type {Team} from 'sentry/types/organization';
+import {defined} from 'sentry/utils';
 import {trackAnalytics} from 'sentry/utils/analytics';
 import slugify from 'sentry/utils/slugify';
 import useApi from 'sentry/utils/useApi';
 import useOrganization from 'sentry/utils/useOrganization';
-import type {IssueAlertFragment} from 'sentry/views/projectInstall/createProject';
-import IssueAlertOptions from 'sentry/views/projectInstall/issueAlertOptions';
+import type {RequestDataFragment} from 'sentry/views/projectInstall/issueAlertOptions';
+import IssueAlertOptions, {
+  MetricValues,
+  RuleAction,
+} from 'sentry/views/projectInstall/issueAlertOptions';
 
 type Props = ModalRenderProps & {
   defaultCategory?: Category;
@@ -42,11 +46,11 @@ export default function ProjectCreationModal({
 }: Props) {
   const [platform, setPlatform] = useState<OnboardingSelectedSDK | undefined>(undefined);
   const [step, setStep] = useState(0);
-  const [alertRuleConfig, setAlertRuleConfig] = useState<IssueAlertFragment | undefined>(
+  const [alertRuleConfig, setAlertRuleConfig] = useState<RequestDataFragment | undefined>(
     undefined
   );
   const [projectName, setProjectName] = useState('');
-  const [team, setTeam] = useState<Team | undefined>(undefined);
+  const [team, setTeam] = useState<string | undefined>(undefined);
   const [creating, setCreating] = useState(false);
   const api = useApi();
   const organization = useOrganization();
@@ -154,8 +158,29 @@ export default function ProjectCreationModal({
         <Fragment>
           <Subtitle>{t('Set your alert frequency')}</Subtitle>
           <IssueAlertOptions
-            platformLanguage={platform?.language as SupportedLanguages}
-            onChange={updatedData => setAlertRuleConfig(updatedData)}
+            alertSetting={
+              alertRuleConfig?.shouldCreateCustomRule
+                ? RuleAction.CUSTOMIZED_ALERTS
+                : alertRuleConfig?.shouldCreateRule === false
+                  ? RuleAction.CREATE_ALERT_LATER
+                  : RuleAction.DEFAULT_ALERT
+            }
+            interval={
+              defined(alertRuleConfig?.conditions?.[0]?.interval)
+                ? String(alertRuleConfig?.conditions?.[0]?.interval)
+                : undefined
+            }
+            threshold={
+              defined(alertRuleConfig?.conditions?.[0]?.value)
+                ? String(alertRuleConfig?.conditions?.[0]?.value)
+                : undefined
+            }
+            metric={
+              alertRuleConfig?.conditions?.[0]?.id.endsWith('EventFrequencyCondition')
+                ? MetricValues.ERRORS
+                : MetricValues.USERS
+            }
+            onChange={setAlertRuleConfig}
           />
           <Subtitle>{t('Name your project and assign it a team')}</Subtitle>
           <ProjectNameTeamSection>
@@ -183,7 +208,7 @@ export default function ProjectCreationModal({
                 clearable={false}
                 value={team}
                 placeholder={t('Select a Team')}
-                onChange={(choice: any) => setTeam(choice.value)}
+                onChange={(choice: TeamOption) => setTeam(choice.value)}
                 teamFilter={(tm: Team) => tm.access.includes('team:admin')}
               />
             </div>

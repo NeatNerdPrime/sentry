@@ -5,6 +5,7 @@ import {
   SubscriptionFixture,
 } from 'getsentry-test/fixtures/subscription';
 
+import {DataCategory} from 'sentry/types/core';
 import {ChartDataTransform} from 'sentry/views/organizationStats/usageChart';
 
 import {type BillingStats, PlanTier} from 'getsentry/types';
@@ -91,7 +92,7 @@ describe('mapCostStatsToChart', () => {
     ];
 
     const result = mapCostStatsToChart({
-      category: 'errors',
+      category: DataCategory.ERRORS,
       stats,
       transform: ChartDataTransform.CUMULATIVE,
       subscription,
@@ -145,7 +146,7 @@ describe('mapCostStatsToChart', () => {
     ];
 
     const result = mapCostStatsToChart({
-      category: 'errors',
+      category: DataCategory.ERRORS,
       stats,
       transform: ChartDataTransform.PERIODIC,
       subscription,
@@ -199,7 +200,7 @@ describe('mapCostStatsToChart', () => {
     ];
 
     const result = mapCostStatsToChart({
-      category: 'errors',
+      category: DataCategory.ERRORS,
       stats,
       transform: ChartDataTransform.PERIODIC,
       subscription,
@@ -233,7 +234,7 @@ describe('mapCostStatsToChart', () => {
     );
 
     const result = mapCostStatsToChart({
-      category: 'errors',
+      category: DataCategory.ERRORS,
       stats,
       transform: ChartDataTransform.PERIODIC,
       subscription,
@@ -301,6 +302,7 @@ describe('mapReservedBudgetStatsToChart', () => {
         reservedCpe: 1_00,
         reservedSpend: 2000_00,
         totalReservedBudget: 2000_00,
+        apiName: 'dynamicSampling',
       },
     };
 
@@ -328,7 +330,7 @@ describe('mapReservedBudgetStatsToChart', () => {
       ],
       reserved: [
         {
-          value: ['Jan 1', 500_00],
+          value: ['Jan 1', 2000_00],
         },
         {
           value: ['Jan 2', 2000_00],
@@ -428,6 +430,7 @@ describe('mapReservedBudgetStatsToChart', () => {
         reservedCpe: 1_00,
         reservedSpend: 1500_00,
         totalReservedBudget: 2000_00,
+        apiName: 'dynamicSampling',
       },
       spansIndexed: {
         freeBudget: 0,
@@ -435,6 +438,7 @@ describe('mapReservedBudgetStatsToChart', () => {
         reservedCpe: 2_00,
         reservedSpend: 500_00,
         totalReservedBudget: 2000_00,
+        apiName: 'dynamicSampling',
       },
     };
 
@@ -462,7 +466,7 @@ describe('mapReservedBudgetStatsToChart', () => {
       ],
       reserved: [
         {
-          value: ['Jan 1', 1000_00],
+          value: ['Jan 1', 2000_00],
         },
         {
           value: ['Jan 2', 2000_00],
@@ -512,6 +516,7 @@ describe('mapReservedBudgetStatsToChart', () => {
         reservedCpe: 1_00,
         reservedSpend: 2000_00,
         totalReservedBudget: 2000_00,
+        apiName: 'dynamicSampling',
       },
     };
 
@@ -536,10 +541,10 @@ describe('mapReservedBudgetStatsToChart', () => {
       ],
       reserved: [
         {
-          value: ['Jan 1', 500_00],
+          value: ['Jan 1', 2000_00],
         },
         {
-          value: ['Jan 2', 1500_00],
+          value: ['Jan 2', 2000_00],
         },
       ],
     });
@@ -607,6 +612,7 @@ describe('mapReservedBudgetStatsToChart', () => {
         reservedCpe: 1_00,
         reservedSpend: 1250_00,
         totalReservedBudget: 2000_00,
+        apiName: 'dynamicSampling',
       },
       spansIndexed: {
         freeBudget: 0,
@@ -614,6 +620,7 @@ describe('mapReservedBudgetStatsToChart', () => {
         reservedCpe: 2_00,
         reservedSpend: 750_00,
         totalReservedBudget: 2000_00,
+        apiName: 'dynamicSampling',
       },
     };
 
@@ -638,10 +645,10 @@ describe('mapReservedBudgetStatsToChart', () => {
       ],
       reserved: [
         {
-          value: ['Jan 1', 1000_00],
+          value: ['Jan 1', 4000_00],
         },
         {
-          value: ['Jan 2', 1000_00],
+          value: ['Jan 2', 4000_00],
         },
       ],
     });

@@ -63,7 +63,7 @@ export enum ChartType {
   AREA = 2,
 }
 
-export interface ChartRenderingProps {
+interface ChartRenderingProps {
   height: number;
   isFullscreen: boolean;
 }
@@ -648,7 +648,7 @@ const StyledTransparentLoadingMask = styled((props: any) => (
   align-items: center;
 `;
 
-export function LoadingScreen({loading}: {loading: boolean}) {
+function LoadingScreen({loading}: {loading: boolean}) {
   if (!loading) {
     return null;
   }

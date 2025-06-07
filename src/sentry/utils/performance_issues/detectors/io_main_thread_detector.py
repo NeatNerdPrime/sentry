@@ -7,7 +7,6 @@ from typing import Any
 import sentry_sdk
 from symbolic.proguard import ProguardMapper
 
-from sentry import features, options
 from sentry.issues.grouptype import (
     GroupType,
     PerformanceDBMainThreadGroupType,
@@ -31,8 +30,6 @@ from ..types import Span
 
 
 class BaseIOMainThreadDetector(PerformanceDetector):
-    __slots__ = ("stored_problems",)
-
     SPAN_PREFIX: str  # abstract
     group_type: type[GroupType]  # abstract
 
@@ -45,7 +42,6 @@ class BaseIOMainThreadDetector(PerformanceDetector):
     def __init__(self, settings: dict[DetectorType, Any], event: dict[str, Any]) -> None:
         super().__init__(settings, event)
 
-        self.stored_problems = {}
         self.mapper: ProguardMapper | None = None
         self.parent_to_blocked_span: dict[str, list[Span]] = defaultdict(list)
 
@@ -106,7 +102,7 @@ class BaseIOMainThreadDetector(PerformanceDetector):
                 )
 
     def is_creation_allowed_for_project(self, project: Project) -> bool:
-        return self.settings[0]["detection_enabled"]
+        return self.settings["detection_enabled"]
 
 
 class FileIOMainThreadDetector(BaseIOMainThreadDetector):
@@ -114,17 +110,11 @@ class FileIOMainThreadDetector(BaseIOMainThreadDetector):
     Checks for a file io span on the main thread
     """
 
-    __slots__ = ("stored_problems",)
-
     IGNORED_SUFFIXES = [".nib", ".plist", "kblayout_iphone.dat"]
     SPAN_PREFIX = "file"
     type = DetectorType.FILE_IO_MAIN_THREAD
     settings_key = DetectorType.FILE_IO_MAIN_THREAD
     group_type = PerformanceFileIOMainThreadGroupType
-
-    @classmethod
-    def is_detector_enabled(cls) -> bool:
-        return not options.get("performance_issues.file_io_main_thread.disabled")
 
     def _prepare_deobfuscation(self) -> None:
         event = self._event
@@ -200,17 +190,13 @@ class FileIOMainThreadDetector(BaseIOMainThreadDetector):
         return data.get("blocked_main_thread", False) is True
 
     def is_creation_allowed_for_organization(self, organization: Organization) -> bool:
-        return features.has(
-            "organizations:performance-file-io-main-thread-detector", organization, actor=None
-        )
+        return True
 
 
 class DBMainThreadDetector(BaseIOMainThreadDetector):
     """
     Checks for a DB span on the main thread
     """
-
-    __slots__ = ("stored_problems",)
 
     SPAN_PREFIX = "db"
     type = DetectorType.DB_MAIN_THREAD
@@ -220,7 +206,6 @@ class DBMainThreadDetector(BaseIOMainThreadDetector):
     def __init__(self, settings: dict[DetectorType, Any], event: dict[str, Any]) -> None:
         super().__init__(settings, event)
 
-        self.stored_problems = {}
         self.mapper = None
         self.parent_to_blocked_span = defaultdict(list)
 
@@ -243,6 +228,4 @@ class DBMainThreadDetector(BaseIOMainThreadDetector):
         return data.get("blocked_main_thread", False) is True
 
     def is_creation_allowed_for_organization(self, organization: Organization) -> bool:
-        return features.has(
-            "organizations:performance-db-main-thread-detector", organization, actor=None
-        )
+        return True

@@ -14,9 +14,7 @@ from sentry.issues.grouptype import PerformanceNPlusOneAPICallsGroupType
 from sentry.issues.issue_occurrence import IssueEvidence
 from sentry.models.organization import Organization
 from sentry.models.project import Project
-from sentry.utils.performance_issues.detectors.utils import get_total_span_duration
-
-from ..base import (
+from sentry.utils.performance_issues.base import (
     DetectorType,
     PerformanceDetector,
     fingerprint_http_spans,
@@ -25,8 +23,9 @@ from ..base import (
     get_url_from_span,
     parameterize_url,
 )
-from ..performance_problem import PerformanceProblem
-from ..types import PerformanceProblemsMap, Span
+from sentry.utils.performance_issues.detectors.utils import get_total_span_duration
+from sentry.utils.performance_issues.performance_problem import PerformanceProblem
+from sentry.utils.performance_issues.types import Span
 
 
 class NPlusOneAPICallsDetector(PerformanceDetector):
@@ -41,7 +40,6 @@ class NPlusOneAPICallsDetector(PerformanceDetector):
           ...
     """
 
-    __slots__ = ["stored_problems"]
     type = DetectorType.N_PLUS_ONE_API_CALLS
     settings_key = DetectorType.N_PLUS_ONE_API_CALLS
 
@@ -49,7 +47,6 @@ class NPlusOneAPICallsDetector(PerformanceDetector):
         super().__init__(settings, event)
 
         # TODO: Only store the span IDs and timestamps instead of entire span objects
-        self.stored_problems: PerformanceProblemsMap = {}
         self.spans: list[Span] = []
         self.span_hashes: dict[str, str | None] = {}
 

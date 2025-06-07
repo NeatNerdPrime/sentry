@@ -244,8 +244,8 @@ def record_event(event: IntegrationPipelineViewType, provider: str):
 
 
 class OAuth2LoginView(PipelineView):
-    authorize_url = None
-    client_id = None
+    authorize_url: str | None = None
+    client_id: str | None = None
     scope = ""
 
     def __init__(self, authorize_url=None, client_id=None, scope=None, *args, **kwargs):
@@ -294,9 +294,9 @@ class OAuth2LoginView(PipelineView):
 
 
 class OAuth2CallbackView(PipelineView):
-    access_token_url = None
-    client_id = None
-    client_secret = None
+    access_token_url: str | None = None
+    client_id: str | None = None
+    client_secret: str | None = None
 
     def __init__(self, access_token_url=None, client_id=None, client_secret=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -328,9 +328,8 @@ class OAuth2CallbackView(PipelineView):
             try:
                 req = safe_urlopen(self.access_token_url, data=data, verify_ssl=verify_ssl)
                 body = safe_urlread(req)
-                if req.headers.get("Content-Type", "").startswith(
-                    "application/x-www-form-urlencoded"
-                ):
+                content_type = req.headers.get("Content-Type", "").lower()
+                if content_type.startswith("application/x-www-form-urlencoded"):
                     return dict(parse_qsl(body))
                 return orjson.loads(body)
             except SSLError:
@@ -354,7 +353,7 @@ class OAuth2CallbackView(PipelineView):
                 }
             except orjson.JSONDecodeError:
                 logger.info("identity.oauth2.json-error", extra={"url": self.access_token_url})
-                lifecycle.record_failure("json_error")
+                lifecycle.record_failure("json_error", {"content_type": content_type})
                 return {
                     "error": "Could not decode a JSON Response",
                     "error_description": "We were not able to parse a JSON response, please try again.",

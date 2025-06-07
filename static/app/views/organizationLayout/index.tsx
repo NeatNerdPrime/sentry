@@ -2,9 +2,10 @@ import {ScrollRestoration} from 'react-router-dom';
 import styled from '@emotion/styled';
 
 import DemoHeader from 'sentry/components/demo/demoHeader';
-import {useFeatureFlagOnboardingDrawer} from 'sentry/components/events/featureFlags/featureFlagOnboardingSidebar';
+import {useFeatureFlagOnboardingDrawer} from 'sentry/components/events/featureFlags/onboarding/featureFlagOnboardingSidebar';
 import {useFeedbackOnboardingDrawer} from 'sentry/components/feedback/feedbackOnboarding/sidebar';
 import Footer from 'sentry/components/footer';
+import {GlobalDrawer} from 'sentry/components/globalDrawer';
 import HookOrDefault from 'sentry/components/hookOrDefault';
 import {usePerformanceOnboardingDrawer} from 'sentry/components/performanceOnboarding/sidebar';
 import {useProfilingOnboardingDrawer} from 'sentry/components/profiling/profilingOnboardingSidebar';
@@ -20,8 +21,9 @@ import useOrganization from 'sentry/utils/useOrganization';
 import {AppBodyContent} from 'sentry/views/app/appBodyContent';
 import Nav from 'sentry/views/nav';
 import {NavContextProvider} from 'sentry/views/nav/context';
-import {usePrefersStackedNav} from 'sentry/views/nav/prefersStackedNav';
+import {usePrefersStackedNav} from 'sentry/views/nav/usePrefersStackedNav';
 import OrganizationContainer from 'sentry/views/organizationContainer';
+import {useReleasesDrawer} from 'sentry/views/releases/drawer/useReleasesDrawer';
 
 import OrganizationDetailsBody from './body';
 
@@ -58,9 +60,11 @@ function OrganizationLayout({children}: Props) {
   return (
     <SentryDocumentTitle noSuffix title={organization?.name ?? 'Sentry'}>
       <OrganizationContainer>
-        <App organization={organization}>{children}</App>
+        <GlobalDrawer>
+          <App organization={organization}>{children}</App>
+        </GlobalDrawer>
       </OrganizationContainer>
-      <ScrollRestoration />
+      <ScrollRestoration getKey={location => location.pathname} />
     </SentryDocumentTitle>
   );
 }
@@ -69,13 +73,18 @@ interface LayoutProps extends Props {
   organization: Organization | null;
 }
 
-function AppLayout({children, organization}: LayoutProps) {
+function AppDrawers() {
   useFeedbackOnboardingDrawer();
   useReplaysOnboardingDrawer();
   usePerformanceOnboardingDrawer();
   useProfilingOnboardingDrawer();
   useFeatureFlagOnboardingDrawer();
+  useReleasesDrawer();
 
+  return null;
+}
+
+function AppLayout({children, organization}: LayoutProps) {
   return (
     <NavContextProvider>
       <AppContainer>
@@ -90,11 +99,14 @@ function AppLayout({children, organization}: LayoutProps) {
           <Footer />
         </BodyContainer>
       </AppContainer>
+      {organization ? <AppDrawers /> : null}
     </NavContextProvider>
   );
 }
 
 function LegacyAppLayout({children, organization}: LayoutProps) {
+  useReleasesDrawer();
+
   return (
     <div className="app">
       <DemoHeader />
