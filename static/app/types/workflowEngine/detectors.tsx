@@ -1,14 +1,69 @@
-import type {
-  DataConditionGroup,
-  DataSource,
-} from 'sentry/types/workflowEngine/dataConditions';
+import type {DataConditionGroup} from 'sentry/types/workflowEngine/dataConditions';
 
-export type DetectorType = 'metric' | 'crons' | 'uptime';
+/**
+ * See SnubaQuerySerializer
+ */
+interface SnubaQuery {
+  aggregate: string;
+  dataset: string;
+  id: string;
+  query: string;
+  /**
+   * Time window in seconds
+   */
+  timeWindow: number;
+  environment?: string;
+}
 
-export interface NewDetector {
+interface BaseDataSource {
+  id: string;
+  organizationId: string;
+  sourceId: string;
+  type: 'snuba_query_subscription' | 'uptime_subscription';
+}
+
+export interface SnubaQueryDataSource extends BaseDataSource {
+  /**
+   * See QuerySubscriptionSerializer
+   */
+  queryObj: {
+    id: string;
+    snubaQuery: SnubaQuery;
+    status: number;
+    subscription: string;
+  };
+  type: 'snuba_query_subscription';
+}
+
+interface UptimeSubscriptionDataSource extends BaseDataSource {
+  /**
+   * See UptimeSubscriptionSerializer
+   */
+  queryObj: {
+    hostProviderId: string;
+    hostProviderName: string;
+    intervalSeconds: number;
+    method: string;
+    timeoutMs: number;
+    traceSampling: boolean;
+    url: string;
+    urlDomain: string;
+    urlDomainSuffix: string;
+  };
+  type: 'uptime_subscription';
+}
+
+/**
+ * See DataSourceSerializer
+ */
+type DataSource = SnubaQueryDataSource | UptimeSubscriptionDataSource;
+
+export type DetectorType = 'error' | 'metric_issue' | 'uptime_domain_failure';
+
+interface NewDetector {
+  conditionGroup: DataConditionGroup | null;
   config: Record<string, unknown>;
-  dataCondition: DataConditionGroup;
-  dataSource: DataSource;
+  dataSources: DataSource[] | null;
   disabled: boolean;
   name: string;
   projectId: string;
@@ -17,8 +72,10 @@ export interface NewDetector {
 }
 
 export interface Detector extends Readonly<NewDetector> {
-  readonly dateCreated: Date;
-  readonly dateUpdated: Date;
+  readonly createdBy: string | null;
+  readonly dateCreated: string;
+  readonly dateUpdated: string;
   readonly id: string;
-  readonly lastTriggered: Date;
+  readonly lastTriggered: string;
+  readonly owner: string | null;
 }

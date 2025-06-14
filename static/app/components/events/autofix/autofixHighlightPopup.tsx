@@ -16,18 +16,20 @@ import {addErrorMessage} from 'sentry/actionCreators/indicator';
 import {SeerIcon} from 'sentry/components/ai/SeerIcon';
 import {UserAvatar} from 'sentry/components/core/avatar/userAvatar';
 import {Button} from 'sentry/components/core/button';
-import {Input} from 'sentry/components/core/input';
+import {TextArea} from 'sentry/components/core/textarea';
 import {
   makeAutofixQueryKey,
   useAutofixData,
 } from 'sentry/components/events/autofix/useAutofix';
 import LoadingIndicator from 'sentry/components/loadingIndicator';
-import {IconChevron, IconClose} from 'sentry/icons';
+import {IconClose} from 'sentry/icons';
 import {t} from 'sentry/locale';
 import {space} from 'sentry/styles/space';
+import {trackAnalytics} from 'sentry/utils/analytics';
 import testableTransition from 'sentry/utils/testableTransition';
 import useApi from 'sentry/utils/useApi';
 import useMedia from 'sentry/utils/useMedia';
+import useOrganization from 'sentry/utils/useOrganization';
 import {useUser} from 'sentry/utils/useUser';
 
 import type {CommentThreadMessage} from './types';
@@ -41,6 +43,7 @@ interface Props {
   stepIndex: number;
   blockName?: string;
   isAgentComment?: boolean;
+  onShouldPersistChange?: (shouldPersist: boolean) => void;
 }
 
 interface OptimisticMessage extends CommentThreadMessage {
@@ -52,6 +55,7 @@ const MIN_LEFT_MARGIN = 8;
 function useCommentThread({groupId, runId}: {groupId: string; runId: string}) {
   const api = useApi({persistInFlight: true});
   const queryClient = useQueryClient();
+  const orgSlug = useOrganization().slug;
 
   return useMutation({
     mutationFn: (params: {
@@ -62,24 +66,32 @@ function useCommentThread({groupId, runId}: {groupId: string; runId: string}) {
       step_index: number;
       thread_id: string;
     }) => {
-      return api.requestPromise(`/issues/${groupId}/autofix/update/`, {
-        method: 'POST',
-        data: {
-          run_id: runId,
-          payload: {
-            type: 'comment_thread',
-            message: params.message,
-            thread_id: params.thread_id,
-            selected_text: params.selected_text,
-            step_index: params.step_index,
-            retain_insight_card_index: params.retain_insight_card_index,
-            is_agent_comment: params.is_agent_comment,
+      return api.requestPromise(
+        `/organizations/${orgSlug}/issues/${groupId}/autofix/update/`,
+        {
+          method: 'POST',
+          data: {
+            run_id: runId,
+            payload: {
+              type: 'comment_thread',
+              message: params.message,
+              thread_id: params.thread_id,
+              selected_text: params.selected_text,
+              step_index: params.step_index,
+              retain_insight_card_index: params.retain_insight_card_index,
+              is_agent_comment: params.is_agent_comment,
+            },
           },
-        },
-      });
+        }
+      );
     },
     onSuccess: _ => {
-      queryClient.invalidateQueries({queryKey: makeAutofixQueryKey(groupId)});
+      queryClient.invalidateQueries({
+        queryKey: makeAutofixQueryKey(orgSlug, groupId, true),
+      });
+      queryClient.invalidateQueries({
+        queryKey: makeAutofixQueryKey(orgSlug, groupId, false),
+      });
     },
     onError: () => {
       addErrorMessage(t('Something went wrong when sending your comment.'));
@@ -90,6 +102,7 @@ function useCommentThread({groupId, runId}: {groupId: string; runId: string}) {
 function useCloseCommentThread({groupId, runId}: {groupId: string; runId: string}) {
   const api = useApi({persistInFlight: true});
   const queryClient = useQueryClient();
+  const orgSlug = useOrganization().slug;
 
   return useMutation({
     mutationFn: (params: {
@@ -97,21 +110,29 @@ function useCloseCommentThread({groupId, runId}: {groupId: string; runId: string
       step_index: number;
       thread_id: string;
     }) => {
-      return api.requestPromise(`/issues/${groupId}/autofix/update/`, {
-        method: 'POST',
-        data: {
-          run_id: runId,
-          payload: {
-            type: 'resolve_comment_thread',
-            thread_id: params.thread_id,
-            step_index: params.step_index,
-            is_agent_comment: params.is_agent_comment,
+      return api.requestPromise(
+        `/organizations/${orgSlug}/issues/${groupId}/autofix/update/`,
+        {
+          method: 'POST',
+          data: {
+            run_id: runId,
+            payload: {
+              type: 'resolve_comment_thread',
+              thread_id: params.thread_id,
+              step_index: params.step_index,
+              is_agent_comment: params.is_agent_comment,
+            },
           },
-        },
-      });
+        }
+      );
     },
     onSuccess: _ => {
-      queryClient.invalidateQueries({queryKey: makeAutofixQueryKey(groupId)});
+      queryClient.invalidateQueries({
+        queryKey: makeAutofixQueryKey(orgSlug, groupId, true),
+      });
+      queryClient.invalidateQueries({
+        queryKey: makeAutofixQueryKey(orgSlug, groupId, false),
+      });
     },
     onError: () => {
       addErrorMessage(t('Something went wrong when resolving the thread.'));
@@ -128,10 +149,14 @@ function AutofixHighlightPopupContent({
   isAgentComment,
   blockName,
   isFocused,
+  onShouldPersistChange,
 }: Props & {isFocused?: boolean}) {
+  const organization = useOrganization();
+
   const {mutate: submitComment} = useCommentThread({groupId, runId});
   const {mutate: closeCommentThread} = useCloseCommentThread({groupId, runId});
 
+  const [hidden, setHidden] = useState(false);
   const [comment, setComment] = useState('');
   const [threadId] = useState(() => {
     const timestamp = Date.now();
@@ -145,7 +170,7 @@ function AutofixHighlightPopupContent({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch current autofix data to get comment thread
-  const {data: autofixData} = useAutofixData({groupId});
+  const {data: autofixData} = useAutofixData({groupId, isUserWatching: true});
   const currentStep = isAgentComment
     ? autofixData?.steps?.[stepIndex + 1]
     : autofixData?.steps?.[stepIndex];
@@ -235,6 +260,14 @@ function AutofixHighlightPopupContent({
       is_agent_comment: isAgentComment ?? false,
     });
     setComment('');
+
+    trackAnalytics('autofix.comment_thread.submit', {
+      organization,
+      group_id: groupId,
+      run_id: runId,
+      step_index: stepIndex,
+      is_agent_comment: isAgentComment ?? false,
+    });
   };
 
   const handleContainerClick = (e: React.MouseEvent) => {
@@ -252,12 +285,27 @@ function AutofixHighlightPopupContent({
 
   const handleResolve = (e: React.MouseEvent) => {
     e.stopPropagation();
+    resolveThread();
+  };
+
+  const resolveThread = () => {
+    setHidden(true);
     closeCommentThread({
       thread_id: threadId,
       step_index: stepIndex,
       is_agent_comment: isAgentComment ?? false,
     });
   };
+
+  useEffect(() => {
+    if (onShouldPersistChange) {
+      onShouldPersistChange(!!commentThread && commentThread.is_completed !== true);
+    }
+  }, [commentThread, onShouldPersistChange]);
+
+  if (hidden) {
+    return null;
+  }
 
   return (
     <Container onClick={handleContainerClick} isFocused={isFocused}>
@@ -317,6 +365,17 @@ function AutofixHighlightPopupContent({
             maxLength={4096}
             size="sm"
             autoFocus
+            maxRows={5}
+            autosize
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              } else if (e.key === 'Escape') {
+                e.preventDefault();
+                resolveThread();
+              }
+            }}
           />
           <StyledButton
             size="zero"
@@ -324,7 +383,7 @@ function AutofixHighlightPopupContent({
             borderless
             aria-label={t('Submit Comment')}
           >
-            <IconChevron direction="right" />
+            {'\u23CE'}
           </StyledButton>
         </InputWrapper>
       )}
@@ -385,8 +444,12 @@ function AutofixHighlightPopup(props: Props) {
     }
 
     const updatePosition = () => {
+      if (!referenceElement || !popupRef.current) {
+        return;
+      }
+
       const referenceRect = referenceElement.getBoundingClientRect();
-      const popupRect = popupRef.current!.getBoundingClientRect();
+      const popupRect = popupRef.current.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
 
       const drawerElement = document.querySelector('.drawer-panel');
@@ -500,7 +563,9 @@ const ScaleContainer = styled(motion.div)<{isFocused?: boolean}>`
   transition: transform 200ms ease;
 `;
 
-const Container = styled(motion.div)<{isFocused?: boolean}>`
+const Container = styled(motion.div, {
+  shouldForwardProp: prop => prop !== 'isFocused',
+})<{isFocused?: boolean}>`
   position: relative;
   width: 100%;
   border-radius: ${p => p.theme.borderRadius};
@@ -532,12 +597,15 @@ const InputWrapper = styled('form')`
   position: relative;
 `;
 
-const StyledInput = styled(Input)`
+const StyledInput = styled(TextArea)`
   flex-grow: 1;
   background: ${p => p.theme.background}
     linear-gradient(to left, ${p => p.theme.background}, ${p => p.theme.pink400}20);
   border-color: ${p => p.theme.innerBorder};
   padding-right: ${space(4)};
+  padding-top: ${space(0.75)};
+  padding-bottom: ${space(0.75)};
+  resize: none;
 
   &:hover {
     border-color: ${p => p.theme.border};
@@ -552,7 +620,7 @@ const StyledButton = styled(Button)`
   height: 24px;
   width: 24px;
   margin-right: 0;
-
+  color: ${p => p.theme.subText};
   z-index: 2;
 `;
 
@@ -616,6 +684,7 @@ const MessageContent = styled('div')`
   color: ${p => p.theme.textColor};
   word-break: break-word;
   overflow-wrap: break-word;
+  white-space: pre-wrap;
 `;
 
 const CircularSeerIcon = styled('div')`
@@ -629,8 +698,8 @@ const CircularSeerIcon = styled('div')`
   flex-shrink: 0;
 
   > svg {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     color: ${p => p.theme.white};
   }
 `;

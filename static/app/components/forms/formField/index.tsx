@@ -16,6 +16,7 @@ import type {FieldGroupProps} from 'sentry/components/forms/fieldGroup/types';
 import FormContext from 'sentry/components/forms/formContext';
 import type FormModel from 'sentry/components/forms/model';
 import {MockModel} from 'sentry/components/forms/model';
+import FormState from 'sentry/components/forms/state';
 import type {FieldValue} from 'sentry/components/forms/types';
 import PanelAlert from 'sentry/components/panels/panelAlert';
 import {t} from 'sentry/locale';
@@ -140,12 +141,6 @@ interface BaseProps {
   saveOnBlur?: boolean;
 
   /**
-   * A function producing an optional component with extra information.
-   */
-  selectionInfoFunction?: (
-    props: PassthroughProps & {value: FieldValue; error?: string}
-  ) => React.ReactNode;
-  /**
    * Used in the form model to transform the value
    */
   setValue?: (value: FieldValue, props?: any) => any;
@@ -182,7 +177,6 @@ type PassthroughProps = Omit<
   | 'saveOnBlur'
   | 'saveMessage'
   | 'saveMessageAlertType'
-  | 'selectionInfoFunction'
   | 'hideControlState'
   | 'defaultValue'
 >;
@@ -319,7 +313,6 @@ function FormField(props: FormFieldProps) {
         flexibleControlStateSize,
         saveMessage,
         saveMessageAlertType,
-        selectionInfoFunction,
         // Don't pass `defaultValue` down to input fields, will be handled in
         // form model
         defaultValue: _defaultValue,
@@ -351,6 +344,7 @@ function FormField(props: FormFieldProps) {
               {() => {
                 const error = model.getError(name);
                 const value = model.getValue(name);
+                const isSaving = model.getFieldState(name, FormState.SAVING);
 
                 return (
                   <Fragment>
@@ -360,6 +354,7 @@ function FormField(props: FormFieldProps) {
                       model,
                       name,
                       id,
+                      disabled: fieldProps.disabled || isSaving,
                       onKeyDown: handleKeyDown,
                       onChange: handleChange,
                       onBlur: handleBlur,
@@ -379,22 +374,6 @@ function FormField(props: FormFieldProps) {
               }}
             </Observer>
           </FieldGroup>
-          {selectionInfoFunction && (
-            <Observer>
-              {() => {
-                const error = model.getError(name);
-                const value = model.getValue(name);
-
-                return (
-                  <Fragment>
-                    {fieldProps.visible
-                      ? selectionInfoFunction({...fieldProps, error, value})
-                      : null}
-                  </Fragment>
-                );
-              }}
-            </Observer>
-          )}
           {saveOnBlurFieldOverride && (
             <Observer>
               {() => {
