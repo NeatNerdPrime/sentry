@@ -2,7 +2,7 @@ import {useCallback} from 'react';
 import styled from '@emotion/styled';
 import {mergeRefs} from '@react-aria/utils';
 
-import InteractionStateLayer from 'sentry/components/interactionStateLayer';
+import InteractionStateLayer from 'sentry/components/core/interactionStateLayer';
 import type {FormSize} from 'sentry/utils/theme';
 import {withChonk} from 'sentry/utils/theme/withChonk';
 
@@ -20,7 +20,7 @@ const checkboxSizeMap: Record<FormSize, CheckboxConfig> = {
   md: {box: '22px', borderRadius: '6px', icon: '18px'},
 };
 
-export interface CheckboxProps
+interface CheckboxProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'checked' | 'size'> {
   /**
    * Is the checkbox active? Supports 'indeterminate'

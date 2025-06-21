@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 
 import type {SelectKey, SelectOption} from 'sentry/components/core/compactSelect';
 import {CompactSelect} from 'sentry/components/core/compactSelect';
-import {Tooltip} from 'sentry/components/tooltip';
+import {Tooltip} from 'sentry/components/core/tooltip';
 import {t} from 'sentry/locale';
 import type {Sort} from 'sentry/utils/discover/fields';
 import {useExploreMode} from 'sentry/views/explore/contexts/pageParamsContext';
@@ -37,7 +37,7 @@ export function ToolbarSortBy({
 
   const fieldOptions = useSortByFields({
     fields,
-    yAxes: visualizes.flatMap(v => v.yAxes),
+    yAxes: visualizes.map(v => v.yAxis),
     groupBys,
     mode,
   });

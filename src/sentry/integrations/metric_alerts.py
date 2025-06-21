@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import NotRequired, TypedDict
 from urllib import parse
 
+import sentry_sdk
 from django.db.models import Max
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -26,6 +27,8 @@ from sentry.snuba.metrics import format_mri_field, format_mri_field_value, is_mr
 from sentry.snuba.models import SnubaQuery
 from sentry.utils.assets import get_asset_url
 from sentry.utils.http import absolute_uri
+from sentry.workflow_engine.models.alertrule_detector import AlertRuleDetector
+from sentry.workflow_engine.models.incident_groupopenperiod import IncidentGroupOpenPeriod
 
 QUERY_AGGREGATION_DISPLAY = {
     "count()": "events",
@@ -217,9 +220,30 @@ def incident_attachment_info(
     if notification_uuid:
         title_link_params["notification_uuid"] = notification_uuid
 
-    if features.has("organizations:workflow-engine-trigger-actions", organization) and features.has(
-        "organizations:workflow-engine-ui-links", organization
-    ):
+    if features.has("organizations:workflow-engine-trigger-actions", organization):
+        try:
+            alert_rule_id = AlertRuleDetector.objects.values_list("alert_rule_id", flat=True).get(
+                detector_id=alert_context.action_identifier_id
+            )
+            if alert_rule_id is None:
+                raise ValueError("Alert rule id not found when querying for AlertRuleDetector")
+        except AlertRuleDetector.DoesNotExist:
+            raise ValueError("Alert rule detector not found when querying for AlertRuleDetector")
+
+        workflow_engine_params = title_link_params.copy()
+
+        try:
+            open_period_incident = IncidentGroupOpenPeriod.objects.get(
+                group_open_period_id=metric_issue_context.open_period_identifier
+            )
+            workflow_engine_params["alert"] = str(open_period_incident.incident_identifier)
+        except IncidentGroupOpenPeriod.DoesNotExist as e:
+            sentry_sdk.capture_exception(e)
+            # Swallowing the error here since this model isn't being written to just yet
+
+        title_link = build_title_link(alert_rule_id, organization, workflow_engine_params)
+
+    elif features.has("organizations:workflow-engine-ui-links", organization):
         if metric_issue_context.group is None:
             raise ValueError("Group is required for workflow engine UI links")
 

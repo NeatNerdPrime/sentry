@@ -319,9 +319,7 @@ describe('CustomerOverview', function () {
       />
     );
 
-    expect(
-      screen.getByText('Accepted Spans and Stored Spans Reserved Budget')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Spans Budget')).toBeInTheDocument();
     expect(screen.getByText('Reserved Budget:')).toBeInTheDocument();
     expect(screen.getByText('$99,000.00')).toBeInTheDocument();
     expect(screen.getByText('Gifted Budget:')).toBeInTheDocument();
@@ -366,15 +364,15 @@ describe('CustomerOverview', function () {
     expect(screen.queryByText('Spans:')).not.toBeInTheDocument();
     expect(screen.queryByText('Performance Units:')).not.toBeInTheDocument();
     expect(screen.queryByText('Transactions:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Seer:')).not.toBeInTheDocument();
   });
 
-  it('renders no product trials for non-self-serve account', function () {
+  it('renders product trials for non-self-serve account', function () {
     const organization = OrganizationFixture();
-    const enterprise_subscription = SubscriptionFixture({
+    const enterprise_subscription = InvoicedSubscriptionFixture({
       organization,
       plan: 'am3_business_ent_auf',
       planTier: PlanTier.AM3,
-      canSelfServe: false,
     });
 
     render(
@@ -385,9 +383,10 @@ describe('CustomerOverview', function () {
       />
     );
 
-    expect(screen.queryByText('Product Trials')).not.toBeInTheDocument();
-    expect(screen.queryByText('Replays:')).not.toBeInTheDocument();
-    expect(screen.queryByText('Spans:')).not.toBeInTheDocument();
+    expect(screen.getByText('Product Trials')).toBeInTheDocument();
+    expect(screen.getByText('Spans:')).toBeInTheDocument();
+    expect(screen.getByText('Replays:')).toBeInTheDocument();
+    expect(screen.getByText('Seer:')).toBeInTheDocument();
     expect(screen.queryByText('Performance Units:')).not.toBeInTheDocument();
     expect(screen.queryByText('Transactions:')).not.toBeInTheDocument();
   });
@@ -401,6 +400,7 @@ describe('CustomerOverview', function () {
       canSelfServe: true,
     });
     am1_subscription.planDetails.categories = [DataCategory.TRANSACTIONS];
+    am1_subscription.planDetails.availableReservedBudgetTypes = {};
 
     render(
       <CustomerOverview
@@ -449,6 +449,7 @@ describe('CustomerOverview', function () {
     ).not.toBeInTheDocument();
 
     expect(within(productTrialsList).queryByText('Spans:')).not.toBeInTheDocument();
+    expect(within(productTrialsList).queryByText('Seer:')).not.toBeInTheDocument();
   });
 
   it('render product trials for am2 account', function () {
@@ -463,6 +464,7 @@ describe('CustomerOverview', function () {
       DataCategory.REPLAYS,
       DataCategory.TRANSACTIONS,
     ];
+    am2_subscription.planDetails.availableReservedBudgetTypes = {};
 
     render(
       <CustomerOverview
@@ -522,6 +524,7 @@ describe('CustomerOverview', function () {
     ).not.toBeInTheDocument();
 
     expect(within(productTrialsList).queryByText('Spans:')).not.toBeInTheDocument();
+    expect(within(productTrialsList).queryByText('Seer:')).not.toBeInTheDocument();
   });
 
   it('render product trials for am3 account', function () {
@@ -576,6 +579,17 @@ describe('CustomerOverview', function () {
     }
     expect(
       within(spansDefinition).getByRole('button', {name: 'Allow Trial'})
+    ).toBeInTheDocument();
+
+    // Check within the Seer section
+    const seerTermElement = within(productTrialsList).getByText('Seer:');
+    const seerDefinition = seerTermElement.nextElementSibling;
+    expect(seerDefinition).toBeInTheDocument(); // Ensure we found the dd
+    if (!seerDefinition || !(seerDefinition instanceof HTMLElement)) {
+      throw new Error('Seer definition not found or not an HTMLElement');
+    }
+    expect(
+      within(seerDefinition).getByRole('button', {name: 'Allow Trial'})
     ).toBeInTheDocument();
 
     // Ensure other trial categories are NOT present

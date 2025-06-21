@@ -1,18 +1,15 @@
 import type React from 'react';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import styled from '@emotion/styled';
 import classNames from 'classnames';
 import * as qs from 'query-string';
 
-import {Gravatar} from 'sentry/components/core/avatar/gravatar';
-import {LetterAvatar} from 'sentry/components/core/avatar/letterAvatar';
-import {Tooltip, type TooltipProps} from 'sentry/components/tooltip';
+import {Tooltip, type TooltipProps} from 'sentry/components/core/tooltip';
 import type {Avatar as AvatarType} from 'sentry/types/core';
 
-import {
-  type BaseAvatarComponentProps,
-  BaseAvatarComponentStyles,
-} from './baseAvatarComponentStyles';
+import {type BaseAvatarStyleProps, baseAvatarStyles} from './baseAvatarComponentStyles';
+import {Gravatar} from './gravatar';
+import {LetterAvatar} from './letterAvatar';
 
 const DEFAULT_REMOTE_SIZE = 120;
 
@@ -70,6 +67,9 @@ export function BaseAvatar({
 }: BaseAvatarProps) {
   const [hasError, setError] = useState<boolean | null>(null);
 
+  // Reset loading errors when avatar type changes
+  useEffect(() => setError(null), [type]);
+
   const handleError = useCallback(() => setError(true), []);
   const handleLoad = useCallback(() => setError(false), []);
 
@@ -93,8 +93,6 @@ export function BaseAvatar({
         onLoad={handleLoad}
         onError={handleError}
       />
-    ) : type === 'background' ? (
-      <BackgroundAvatar round={round} suggested={suggested} />
     ) : (
       <LetterAvatar
         ref={ref as React.Ref<SVGSVGElement>}
@@ -106,7 +104,7 @@ export function BaseAvatar({
     );
 
   return (
-    <Tooltip title={tooltip} disabled={!hasTooltip} {...tooltipOptions}>
+    <Tooltip title={tooltip} disabled={!hasTooltip} {...tooltipOptions} skipWrapper>
       <AvatarContainer
         ref={ref as React.Ref<HTMLSpanElement>}
         data-test-id={`${type}-avatar`}
@@ -115,7 +113,6 @@ export function BaseAvatar({
         suggested={!!suggested}
         style={{...(size ? {height: size, width: size} : {}), ...style}}
         title={title}
-        hasTooltip={hasTooltip}
         {...props}
       >
         {hasError
@@ -137,7 +134,6 @@ export function BaseAvatar({
 // Note: Avatar will not always be a child of a flex layout, but this seems like a
 // sensible default.
 const AvatarContainer = styled('span')<{
-  hasTooltip: boolean;
   round: boolean;
   suggested: boolean;
 }>`
@@ -145,37 +141,8 @@ const AvatarContainer = styled('span')<{
   border-radius: ${p => (p.round ? '50%' : '3px')};
   border: ${p => (p.suggested ? `1px dashed ${p.theme.subText}` : 'none')};
   background-color: ${p => (p.suggested ? p.theme.background : 'none')};
-  :hover {
-    pointer-events: ${p => (p.hasTooltip ? 'none' : 'auto')};
-  }
 `;
 
-interface BackgroundAvatarProps extends React.HTMLAttributes<SVGSVGElement> {
-  ref?: React.Ref<SVGSVGElement>;
-  round?: boolean;
-  suggested?: boolean;
-}
-
-/**
- * Creates an avatar placeholder that is used when showing multiple
- * suggested assignees
- */
-const BackgroundAvatar = styled(
-  ({round: _round, ref, ...props}: BackgroundAvatarProps) => {
-    return (
-      <svg ref={ref} viewBox="0 0 120 120" {...props}>
-        <rect x="0" y="0" width="120" height="120" rx="15" ry="15" />
-      </svg>
-    );
-  }
-)<BackgroundAvatarProps>`
-  ${BaseAvatarComponentStyles};
-
-  svg rect {
-    fill: ${p => p.theme.purple100};
-  }
-`;
-
-const ImageAvatar = styled('img')<BaseAvatarComponentProps>`
-  ${BaseAvatarComponentStyles};
+const ImageAvatar = styled('img')<BaseAvatarStyleProps>`
+  ${baseAvatarStyles};
 `;

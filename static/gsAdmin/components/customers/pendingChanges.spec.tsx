@@ -2,11 +2,14 @@ import {OrganizationFixture} from 'sentry-fixture/organization';
 
 import {PlanDetailsLookupFixture} from 'getsentry-test/fixtures/planDetailsLookup';
 import {PlanMigrationFixture} from 'getsentry-test/fixtures/planMigration';
+import {SeerReservedBudgetFixture} from 'getsentry-test/fixtures/reservedBudget';
 import {
   Am3DsEnterpriseSubscriptionFixture,
   SubscriptionFixture,
 } from 'getsentry-test/fixtures/subscription';
 import {render, screen} from 'sentry-test/reactTestingLibrary';
+
+import {DataCategory} from 'sentry/types/core';
 
 import PendingChanges from 'admin/components/customers/pendingChanges';
 import {PendingChangesFixture} from 'getsentry/__fixtures__/pendingChanges';
@@ -168,7 +171,11 @@ describe('PendingChanges', function () {
           name: 'Team (Enterprise)',
           contractInterval: 'annual',
           billingInterval: 'annual',
-          onDemandCategories: ['errors', 'transactions', 'attachments'],
+          onDemandCategories: [
+            DataCategory.ERRORS,
+            DataCategory.TRANSACTIONS,
+            DataCategory.ATTACHMENTS,
+          ],
           budgetTerm: 'on-demand',
         }),
         onDemandBudgets: {
@@ -218,7 +225,11 @@ describe('PendingChanges', function () {
           name: 'Team (Enterprise)',
           contractInterval: 'annual',
           billingInterval: 'annual',
-          onDemandCategories: ['errors', 'transactions', 'attachments'],
+          onDemandCategories: [
+            DataCategory.ERRORS,
+            DataCategory.TRANSACTIONS,
+            DataCategory.ATTACHMENTS,
+          ],
           budgetTerm: 'on-demand',
         }),
         onDemandBudgets: {
@@ -269,11 +280,11 @@ describe('PendingChanges', function () {
           contractInterval: 'annual',
           billingInterval: 'annual',
           onDemandCategories: [
-            'errors',
-            'attachments',
-            'spans',
-            'replays',
-            'monitorSeats',
+            DataCategory.ERRORS,
+            DataCategory.ATTACHMENTS,
+            DataCategory.SPANS,
+            DataCategory.REPLAYS,
+            DataCategory.MONITOR_SEATS,
           ],
         }),
         reservedEvents: 50_000,
@@ -362,7 +373,40 @@ describe('PendingChanges', function () {
       'Reserved cost-per-event for stored spans — $0.02000000 → $0.87654321'
     );
     expect(container).toHaveTextContent(
-      'Reserved budgets — $100,000.00 for accepted spans and stored spans → $50,000.00 for accepted spans and stored spans'
+      'Reserved budgets — $100,000.00 for spans budget → $50,000.00 for spans budget'
+    );
+  });
+
+  it('does not render reserved budgets with mocked values', function () {
+    const subscription = SubscriptionFixture({
+      organization: OrganizationFixture(),
+      reservedBudgets: [
+        SeerReservedBudgetFixture({
+          id: '0',
+          reservedBudget: 0,
+        }),
+      ],
+      pendingChanges: PendingChangesFixture({
+        planDetails: PlanDetailsLookupFixture('am3_business_ent'),
+        plan: 'am3_business_ent',
+        planName: 'Business',
+        reserved: {
+          spans: 0,
+          spansIndexed: 0,
+        },
+        reservedBudgets: [
+          {
+            reservedBudget: 0,
+            categories: {seerAutofix: true, seerScanner: true},
+          },
+        ],
+      }),
+    });
+
+    const {container} = render(<PendingChanges subscription={subscription} />);
+
+    expect(container).not.toHaveTextContent(
+      'Reserved budgets — $0.00 for seer budget → $0.00 for seer budget'
     );
   });
 
@@ -410,7 +454,7 @@ describe('PendingChanges', function () {
       'Reserved cost-per-event for stored spans — None → $0.87654321'
     );
     expect(container).toHaveTextContent(
-      'Reserved budgets — None → $50,000.00 for accepted spans and stored spans'
+      'Reserved budgets — None → $50,000.00 for spans budget'
     );
   });
 
@@ -447,7 +491,7 @@ describe('PendingChanges', function () {
       'Reserved cost-per-event for spansIndexed — $0.02000000 → None'
     );
     expect(container).toHaveTextContent(
-      'Reserved budgets — $100,000.00 for accepted spans and stored spans → None'
+      'Reserved budgets — $100,000.00 for spans budget → None'
     );
   });
 

@@ -9,9 +9,9 @@ import {
   addLoadingMessage,
   clearIndicators,
 } from 'sentry/actionCreators/indicator';
-import {Flex} from 'sentry/components/container/flex';
 import {Alert} from 'sentry/components/core/alert';
 import {Checkbox} from 'sentry/components/core/checkbox';
+import {Flex} from 'sentry/components/core/layout';
 import IssueStreamHeaderLabel from 'sentry/components/IssueStreamHeaderLabel';
 import {Sticky} from 'sentry/components/sticky';
 import {t, tct, tn} from 'sentry/locale';
@@ -474,12 +474,6 @@ function shouldConfirm(
       return true; // By default, should confirm ...
   }
 }
-
-export const HeaderDivider = styled(motion.div)`
-  background-color: ${p => p.theme.gray200};
-  width: 1px;
-  border-radius: ${p => p.theme.borderRadius};
-`;
 
 const StickyActions = styled(Sticky)`
   z-index: ${p => p.theme.zIndex.issuesList.stickyHeader};

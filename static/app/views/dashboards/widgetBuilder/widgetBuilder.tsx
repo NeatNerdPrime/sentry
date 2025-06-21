@@ -72,7 +72,7 @@ import {
   DashboardsMEPProvider,
 } from 'sentry/views/dashboards/widgetCard/dashboardsMEPContext';
 import type WidgetLegendSelectionState from 'sentry/views/dashboards/widgetLegendSelectionState';
-import {useSpanTags} from 'sentry/views/explore/contexts/spanTagsContext';
+import {useTraceItemTags} from 'sentry/views/explore/contexts/spanTagsContext';
 import {MetricsDataSwitcher} from 'sentry/views/performance/landing/metricsDataSwitcher';
 
 import {BuildStep} from './buildSteps/buildStep';
@@ -221,14 +221,8 @@ function WidgetBuilder({
     DashboardWidgetSource.ISSUE_DETAILS,
   ].includes(source);
 
-  const defaultWidgetType =
-    organization.features.includes('performance-discover-dataset-selector') && !isEditing // i.e. creating
-      ? WidgetType.ERRORS
-      : WidgetType.DISCOVER;
-  const defaultDataset =
-    organization.features.includes('performance-discover-dataset-selector') && !isEditing // i.e. creating
-      ? DataSet.ERRORS
-      : DataSet.EVENTS;
+  const defaultWidgetType = WidgetType.ERRORS;
+  const defaultDataset = DataSet.ERRORS;
   const dataSet = dataset ? dataset : defaultDataset;
 
   const api = useApi();
@@ -306,8 +300,8 @@ function WidgetBuilder({
   let tags: TagCollection = useTags();
 
   // HACK: Inject EAP dataset tags when selecting the Spans dataset
-  const {tags: numericSpanTags} = useSpanTags('number');
-  const {tags: stringSpanTags} = useSpanTags('string');
+  const {tags: numericSpanTags} = useTraceItemTags('number');
+  const {tags: stringSpanTags} = useTraceItemTags('string');
   if (state.dataSet === DataSet.SPANS) {
     tags = {...numericSpanTags, ...stringSpanTags};
   }

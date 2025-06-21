@@ -180,7 +180,9 @@ const SIZES: FlamegraphTheme['SIZES'] = {
   CHART_PX_PADDING: 30,
 };
 
-function makeFlamegraphFonts(theme: Theme): FlamegraphTheme['FONTS'] {
+function makeFlamegraphFonts(
+  theme: Theme | DO_NOT_USE_ChonkTheme
+): FlamegraphTheme['FONTS'] {
   return {
     FONT: MONOSPACE_FONT,
     FRAME_FONT: theme.text.familyMono,
@@ -189,6 +191,7 @@ function makeFlamegraphFonts(theme: Theme): FlamegraphTheme['FONTS'] {
 
 /** Legacy theme definitions */
 export function makeLightFlamegraphTheme(theme: Theme): FlamegraphTheme {
+  const chartColors = theme.chart.getColorPalette(12);
   return {
     LCH: LCH_LIGHT,
     SIZES,
@@ -207,10 +210,10 @@ export function makeLightFlamegraphTheme(theme: Theme): FlamegraphTheme {
         'by frequency': makeColorMapByFrequency,
         'by system vs application frame': makeColorMapBySystemVsApplicationFrame,
       },
-      CPU_CHART_COLORS: theme.chart.colors[12].map(c => hexToColorChannels(c, 0.8)),
+      CPU_CHART_COLORS: chartColors.map(c => hexToColorChannels(c, 0.8)),
       MEMORY_CHART_COLORS: [
-        hexToColorChannels(theme.chart.colors[4][2], 0.8),
-        hexToColorChannels(theme.chart.colors[4][3], 0.8),
+        hexToColorChannels(chartColors[2], 0.8),
+        hexToColorChannels(chartColors[3], 0.8),
       ],
       CHART_CURSOR_INDICATOR: 'rgba(31,35,58,.75)',
       CHART_LABEL_COLOR: 'rgba(31,35,58,.75)',
@@ -246,6 +249,7 @@ export function makeLightFlamegraphTheme(theme: Theme): FlamegraphTheme {
 }
 
 export function makeDarkFlamegraphTheme(theme: Theme): FlamegraphTheme {
+  const chartColors = theme.chart.getColorPalette(12);
   return {
     LCH: LCH_DARK,
     SIZES,
@@ -264,10 +268,10 @@ export function makeDarkFlamegraphTheme(theme: Theme): FlamegraphTheme {
         'by frequency': makeColorMapByFrequency,
         'by system vs application frame': makeColorMapBySystemVsApplicationFrame,
       },
-      CPU_CHART_COLORS: theme.chart.colors[12].map(c => hexToColorChannels(c, 0.8)),
+      CPU_CHART_COLORS: chartColors.map(c => hexToColorChannels(c, 0.8)),
       MEMORY_CHART_COLORS: [
-        hexToColorChannels(theme.chart.colors[4][2], 0.5),
-        hexToColorChannels(theme.chart.colors[4][3], 0.5),
+        hexToColorChannels(chartColors[2], 0.5),
+        hexToColorChannels(chartColors[3], 0.5),
       ],
       CHART_CURSOR_INDICATOR: 'rgba(255, 255, 255, 0.5)',
       CHART_LABEL_COLOR: 'rgba(255, 255, 255, 0.5)',
@@ -321,9 +325,14 @@ const SPAN_LCH_LIGHT_CHONK = {
 export const makeLightChonkFlamegraphTheme = (
   theme: DO_NOT_USE_ChonkTheme
 ): FlamegraphTheme => {
+  const chartColors = theme.chart.getColorPalette(12);
+
   return {
     LCH: LCH_LIGHT_CHONK,
-    SIZES,
+    SIZES: {
+      ...SIZES,
+      TIMELINE_LABEL_HEIGHT: 26,
+    },
     FONTS: makeFlamegraphFonts(theme),
     COLORS: {
       COLOR_BUCKET: makeColorBucketTheme(LCH_LIGHT_CHONK),
@@ -339,7 +348,7 @@ export const makeLightChonkFlamegraphTheme = (
       },
 
       // Charts
-      CPU_CHART_COLORS: theme.chart.colors[12].map(c => hexToColorChannels(c, 0.8)),
+      CPU_CHART_COLORS: chartColors.map(c => hexToColorChannels(c, 0.8)),
       MEMORY_CHART_COLORS: [
         hexToColorChannels(theme.colors.yellow400, 1),
         hexToColorChannels(theme.colors.red400, 1),
@@ -351,8 +360,8 @@ export const makeLightChonkFlamegraphTheme = (
       // Preset colors
       FRAME_APPLICATION_COLOR: hexToColorChannels(theme.colors.blue400, 0.4),
       FRAME_SYSTEM_COLOR: hexToColorChannels(theme.colors.red400, 0.3),
-      DIFFERENTIAL_DECREASE: hexToColorChannels(theme.colors.yellow200, 1),
-      DIFFERENTIAL_INCREASE: hexToColorChannels(theme.colors.red300, 1),
+      DIFFERENTIAL_DECREASE: hexToColorChannels(theme.colors.blue400, 0.6),
+      DIFFERENTIAL_INCREASE: hexToColorChannels(theme.colors.red400, 0.4),
       SAMPLE_TICK_COLOR: hexToColorChannels(theme.colors.red400, 0.5),
 
       // Cursors and labels
@@ -410,9 +419,13 @@ const SPANS_LCH_DARK_CHONK = {
 export const makeDarkChonkFlamegraphTheme = (
   theme: DO_NOT_USE_ChonkTheme
 ): FlamegraphTheme => {
+  const chartColors = theme.chart.getColorPalette(12);
   return {
     LCH: LCH_DARK_CHONK,
-    SIZES,
+    SIZES: {
+      ...SIZES,
+      TIMELINE_LABEL_HEIGHT: 26,
+    },
     FONTS: makeFlamegraphFonts(theme),
     COLORS: {
       COLOR_BUCKET: makeColorBucketTheme(LCH_DARK_CHONK),
@@ -428,7 +441,7 @@ export const makeDarkChonkFlamegraphTheme = (
       },
 
       // Charts
-      CPU_CHART_COLORS: theme.chart.colors[12].map(c => hexToColorChannels(c, 0.8)),
+      CPU_CHART_COLORS: chartColors.map(c => hexToColorChannels(c, 0.8)),
       MEMORY_CHART_COLORS: [
         hexToColorChannels(theme.colors.yellow400, 1),
         hexToColorChannels(theme.colors.red400, 1),
@@ -440,8 +453,8 @@ export const makeDarkChonkFlamegraphTheme = (
       // Preset colors
       FRAME_APPLICATION_COLOR: hexToColorChannels(theme.colors.blue400, 0.6),
       FRAME_SYSTEM_COLOR: hexToColorChannels(theme.colors.red400, 0.5),
-      DIFFERENTIAL_DECREASE: hexToColorChannels(theme.colors.yellow200, 1),
-      DIFFERENTIAL_INCREASE: hexToColorChannels(theme.colors.red300, 1),
+      DIFFERENTIAL_DECREASE: hexToColorChannels(theme.colors.blue400, 0.6),
+      DIFFERENTIAL_INCREASE: hexToColorChannels(theme.colors.red400, 0.4),
       SAMPLE_TICK_COLOR: hexToColorChannels(theme.colors.red400, 0.5),
 
       // Cursors and labels

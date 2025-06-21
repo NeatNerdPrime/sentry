@@ -2,10 +2,10 @@ import {useState} from 'react';
 import styled from '@emotion/styled';
 
 import {SegmentedControl} from 'sentry/components/core/segmentedControl';
+import {Tooltip} from 'sentry/components/core/tooltip';
 import KeyValueList from 'sentry/components/events/interfaces/keyValueList';
 import type {RawSpanType} from 'sentry/components/events/interfaces/spans/types';
 import QuestionTooltip from 'sentry/components/questionTooltip';
-import {Tooltip} from 'sentry/components/tooltip';
 import {IconCheckmark, IconClose} from 'sentry/icons';
 import {t} from 'sentry/locale';
 import {space} from 'sentry/styles/space';
@@ -51,13 +51,15 @@ function addFingerprintInfo(data: VariantData, variant: EventGroupVariant) {
       t('Client fingerprint values'),
       <TextWithQuestionTooltip key="type">
         {variant.client_values}
-        <QuestionTooltip
-          size="xs"
-          position="top"
-          title={t(
-            'The client sent a fingerprint that was overridden by a server-side fingerprinting rule.'
-          )}
-        />
+        {'matched_rule' in variant && ( // Only display override tooltip if overriding actually happened
+          <QuestionTooltip
+            size="xs"
+            position="top"
+            title={t(
+              'The client sent a fingerprint that was overridden by a server-side fingerprinting rule.'
+            )}
+          />
+        )}
       </TextWithQuestionTooltip>,
     ]);
   }
@@ -98,68 +100,19 @@ function GroupingVariant({event, showGroupingConfig, variant}: GroupingVariantPr
     switch (variant.type) {
       case EventGroupVariantType.COMPONENT:
         component = variant.component;
-        data.push([
-          t('Type'),
-          <TextWithQuestionTooltip key="type">
-            {variant.type}
-            <QuestionTooltip
-              size="xs"
-              position="top"
-              title={t(
-                'Uses a complex grouping algorithm taking event data into account'
-              )}
-            />
-          </TextWithQuestionTooltip>,
-        ]);
+
         if (showGroupingConfig && variant.config?.id) {
           data.push([t('Grouping Config'), variant.config.id]);
         }
         break;
       case EventGroupVariantType.CUSTOM_FINGERPRINT:
-        data.push([
-          t('Type'),
-          <TextWithQuestionTooltip key="type">
-            {variant.type}
-            <QuestionTooltip
-              size="xs"
-              position="top"
-              title={t('Overrides the default grouping by a custom fingerprinting rule')}
-            />
-          </TextWithQuestionTooltip>,
-        ]);
         addFingerprintInfo(data, variant);
         break;
       case EventGroupVariantType.BUILT_IN_FINGERPRINT:
-        data.push([
-          t('Type'),
-          <TextWithQuestionTooltip key="type">
-            {variant.type}
-            <QuestionTooltip
-              size="xs"
-              position="top"
-              title={t(
-                'Overrides the default grouping by a Sentry defined fingerprinting rule'
-              )}
-            />
-          </TextWithQuestionTooltip>,
-        ]);
         addFingerprintInfo(data, variant);
         break;
       case EventGroupVariantType.SALTED_COMPONENT:
         component = variant.component;
-        data.push([
-          t('Type'),
-          <TextWithQuestionTooltip key="type">
-            {variant.type}
-            <QuestionTooltip
-              size="xs"
-              position="top"
-              title={t(
-                'Uses a complex grouping algorithm taking event data and a fingerprint into account'
-              )}
-            />
-          </TextWithQuestionTooltip>,
-        ]);
         addFingerprintInfo(data, variant);
         if (showGroupingConfig && variant.config?.id) {
           data.push([t('Grouping Config'), variant.config.id]);
@@ -171,19 +124,6 @@ function GroupingVariant({event, showGroupingConfig, variant}: GroupingVariantPr
             .find((c): c is EntrySpans => c.type === 'spans')
             ?.data?.map((span: RawSpanType) => [span.span_id, span.hash]) ?? []
         );
-        data.push([
-          t('Type'),
-          <TextWithQuestionTooltip key="type">
-            {variant.type}
-            <QuestionTooltip
-              size="xs"
-              position="top"
-              title={t(
-                'Uses the evidence from performance issue detection to generate a fingerprint.'
-              )}
-            />
-          </TextWithQuestionTooltip>,
-        ]);
 
         data.push(['Performance Issue Type', variant.key]);
         data.push(['Span Operation', variant.evidence.op]);
