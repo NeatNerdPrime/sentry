@@ -9139,10 +9139,10 @@ makeerror@1.0.12:
   dependencies:
     tmpl "1.0.5"
 
-marked@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-6.0.0.tgz#80cd7f51145437cffe9f541a318b9882f75601df"
-  integrity sha512-7E3m/xIlymrFL5gWswIT4CheIE3fDeh51NV09M4x8iOc7NDYlyERcQMLAIHcSlrvwliwbPQ4OGD+MpPSYiQcqw==
+marked@16.0.0:
+  version "16.0.0"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-16.0.0.tgz#0c48e79782f26224f8ce34878644d8c320ad599f"
+  integrity sha512-MUKMXDjsD/eptB7GPzxo4xcnLS6oo7/RHimUMHEDRhUooPwmN9BEpMl7AEOJv3bmso169wHI2wUF9VQgL7zfmA==
 
 math-intrinsics@^1.0.0, math-intrinsics@^1.1.0:
   version "1.1.0"
