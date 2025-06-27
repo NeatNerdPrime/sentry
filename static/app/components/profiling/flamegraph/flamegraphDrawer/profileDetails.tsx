@@ -392,7 +392,7 @@ function ProfileEventDetails({
             return (
               <DetailsRow key={key}>
                 <strong>{label}:</strong>
-                <Link to={makeProjectsPathname({path: '/', orgSlug: organization.slug})}>
+                <Link to={makeProjectsPathname({path: '/', organization})}>
                   <span>
                     <OrganizationAvatar size={12} organization={organization} />{' '}
                     {organization.name}
@@ -432,7 +432,7 @@ function ProfileEventDetails({
                   to={
                     makeProjectsPathname({
                       path: `/${project.slug}/`,
-                      orgSlug: organization.slug,
+                      organization,
                     }) + `?project=${project.id}`
                   }
                 >
@@ -536,7 +536,7 @@ const DetailsRow = styled('div')`
   overflow: hidden;
   display: flex;
   align-items: center;
-  font-size: ${p => p.theme.fontSizeSmall};
+  font-size: ${p => p.theme.fontSize.sm};
 
   > span,
   > a {

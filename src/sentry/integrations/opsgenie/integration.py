@@ -24,8 +24,10 @@ from sentry.integrations.models.organization_integration import OrganizationInte
 from sentry.integrations.on_call.metrics import OnCallIntegrationsHaltReason, OnCallInteractionType
 from sentry.integrations.opsgenie.metrics import record_event
 from sentry.integrations.opsgenie.tasks import migrate_opsgenie_plugin
+from sentry.integrations.pipeline import IntegrationPipeline
+from sentry.integrations.types import IntegrationProviderSlug
 from sentry.organizations.services.organization.model import RpcOrganization
-from sentry.pipeline import Pipeline, PipelineView
+from sentry.pipeline.views.base import PipelineView
 from sentry.shared_integrations.exceptions import (
     ApiError,
     ApiRateLimitedError,
@@ -102,8 +104,8 @@ class InstallationForm(forms.Form):
     )
 
 
-class InstallationConfigView(PipelineView):
-    def dispatch(self, request: HttpRequest, pipeline: Pipeline) -> HttpResponseBase:
+class InstallationConfigView:
+    def dispatch(self, request: HttpRequest, pipeline: IntegrationPipeline) -> HttpResponseBase:
         if request.method == "POST":
             form = InstallationForm(request.POST)
             if form.is_valid():
@@ -231,7 +233,7 @@ class OpsgenieIntegration(IntegrationInstallation):
 
 
 class OpsgenieIntegrationProvider(IntegrationProvider):
-    key = "opsgenie"
+    key = IntegrationProviderSlug.OPSGENIE.value
     name = "Opsgenie"
     metadata = metadata
     integration_cls = OpsgenieIntegration
@@ -242,7 +244,7 @@ class OpsgenieIntegrationProvider(IntegrationProvider):
         ]
     )
 
-    def get_pipeline_views(self) -> list[PipelineView]:
+    def get_pipeline_views(self) -> Sequence[PipelineView[IntegrationPipeline]]:
         return [InstallationConfigView()]
 
     def build_integration(self, state: Mapping[str, Any]) -> IntegrationData:

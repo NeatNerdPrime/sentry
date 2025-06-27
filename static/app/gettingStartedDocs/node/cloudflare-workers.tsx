@@ -12,7 +12,10 @@ import {
   getCrashReportModalIntroduction,
 } from 'sentry/components/onboarding/gettingStartedDoc/utils/feedbackOnboarding';
 import {t, tct} from 'sentry/locale';
-import {getInstallConfig} from 'sentry/utils/gettingStartedDocs/node';
+import {
+  getInstallConfig,
+  getNodeAgentMonitoringOnboarding,
+} from 'sentry/utils/gettingStartedDocs/node';
 
 type Params = DocsParams;
 
@@ -39,6 +42,10 @@ export default Sentry.withSentry(
     // Learn more at
     // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
     tracesSampleRate: 1.0,
+
+    // Setting this option to true will send default PII data to Sentry.
+    // For example, automatic IP address collection on events
+    sendDefaultPii: true,
   }),
   {
     async fetch(request, env, ctx) {
@@ -158,6 +165,9 @@ const crashReportOnboarding: OnboardingConfig = {
 const docs: Docs = {
   onboarding,
   crashReportOnboarding,
+  agentMonitoringOnboarding: getNodeAgentMonitoringOnboarding({
+    basePackage: 'cloudflare',
+  }),
 };
 
 export default docs;

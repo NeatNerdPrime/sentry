@@ -320,7 +320,7 @@ function RegressedFunctionBeforeAfterFlamechart(
   const onRegressedFunctionClick = useCallback(() => {
     trackAnalytics('profiling_views.go_to_flamegraph', {
       organization: props.organization,
-      source: `profiling_transaction.regressed_functions_table`,
+      source: 'unknown',
     });
   }, [props.organization]);
 
@@ -436,7 +436,7 @@ const RegressedFunctionMetricsRow = styled('div')`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: ${p => p.theme.fontSizeSmall};
+  font-size: ${p => p.theme.fontSize.sm};
   color: ${p => p.theme.subText};
   margin-top: ${space(0.25)};
 `;

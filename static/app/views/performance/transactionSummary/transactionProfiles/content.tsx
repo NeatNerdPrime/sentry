@@ -166,13 +166,15 @@ export function TransactionProfilesContent(props: TransactionProfilesContentProp
                   <RequestStateMessageContainer>
                     {t('There was an error loading the flamegraph.')}
                   </RequestStateMessageContainer>
-                ) : isEmpty(data) ? (
+                ) : isEmpty(data) && visualization !== 'flamegraph' ? (
                   <RequestStateMessageContainer>
                     {t('No profiling data found')}
                   </RequestStateMessageContainer>
                 ) : null}
               </ProfileVisualizationContainer>
-              {showSidePanel && <AggregateFlamegraphSidePanel scheduler={scheduler} />}
+              <AggregateFlamegraphSidePanelContainer visible={showSidePanel}>
+                <AggregateFlamegraphSidePanel scheduler={scheduler} />
+              </AggregateFlamegraphSidePanelContainer>
             </TransactionProfilesContentContainer>
           </FlamegraphProvider>
         </FlamegraphThemeProvider>
@@ -342,4 +344,9 @@ const ViewSelectContainer = styled('div')`
 
 const AggregateFlamegraphSearch = styled(FlamegraphSearch)`
   max-width: 300px;
+`;
+
+const AggregateFlamegraphSidePanelContainer = styled('div')<{visible: boolean}>`
+  overflow-y: scroll;
+  ${p => !p.visible && 'display: none;'}
 `;

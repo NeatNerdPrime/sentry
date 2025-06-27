@@ -6,7 +6,7 @@ import type {Location} from 'history';
 import GridEditable, {
   COL_WIDTH_UNDEFINED,
   type GridColumnHeader,
-} from 'sentry/components/gridEditable';
+} from 'sentry/components/tables/gridEditable';
 import {t} from 'sentry/locale';
 import type {Organization} from 'sentry/types/organization';
 import type {EventsMetaType} from 'sentry/utils/discover/eventView';
@@ -22,7 +22,7 @@ import {TraceViewSources} from 'sentry/views/performance/newTraceDetails/traceHe
 
 type DataRowKeys =
   | SpanIndexedField.PROJECT
-  | SpanIndexedField.TRANSACTION_ID
+  | SpanIndexedField.TRANSACTION_SPAN_ID
   | SpanIndexedField.TRACE
   | SpanIndexedField.TIMESTAMP
   | SpanIndexedField.SPAN_ID
@@ -171,7 +171,7 @@ function renderBodyCell(
         projectSlug={row.project}
         traceId={row.trace}
         timestamp={row.timestamp}
-        transactionId={row[SpanIndexedField.TRANSACTION_ID]}
+        transactionSpanId={row[SpanIndexedField.TRANSACTION_SPAN_ID]}
         spanId={row[SpanIndexedField.SPAN_ID]}
         source={TraceViewSources.QUEUES_MODULE}
         location={location}

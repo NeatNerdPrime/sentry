@@ -13,7 +13,7 @@ import type {
 import {Input} from 'sentry/components/core/input';
 import PanelProvider from 'sentry/utils/panelProvider';
 
-export interface ArithmeticBuilderProps {
+interface ArithmeticBuilderProps {
   aggregateFunctions: AggregateFunction[];
   expression: string;
   functionArguments: FunctionArgument[];
@@ -66,7 +66,7 @@ const Wrapper = styled(Input.withComponent('div'))<{state: 'valid' | 'invalid'}>
   height: auto;
   width: 100%;
   position: relative;
-  font-size: ${p => p.theme.fontSizeMedium};
+  font-size: ${p => p.theme.fontSize.md};
   cursor: text;
 
   ${p =>

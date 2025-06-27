@@ -38,7 +38,7 @@ export function AnrRootCause({event, organization}: Props) {
   const anrCulprit = analyzeFramesForRootCause(event);
 
   useEffect(() => {
-    if (!anrCulprit || anrCulprit.culprit === null || anrCulprit.culprit === undefined) {
+    if (!anrCulprit?.culprit) {
       return;
     }
 
@@ -169,13 +169,13 @@ function Spacer() {
 
 const Subtitle = styled('div')`
   font-size: ${p => p.theme.fontSizeRelativeSmall};
-  font-weight: ${p => p.theme.fontWeightNormal};
+  font-weight: ${p => p.theme.fontWeight.normal};
   color: ${p => p.theme.subText};
 `;
 
 const TitleWithLink = styled(GlobalSelectionLink)`
   display: flex;
-  font-weight: ${p => p.theme.fontWeightBold};
+  font-weight: ${p => p.theme.fontWeight.bold};
 `;
 
 const Title = styled('div')`

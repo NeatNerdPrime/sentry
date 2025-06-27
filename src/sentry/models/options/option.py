@@ -27,13 +27,16 @@ class BaseOption(OverwritableConfigMixin, Model):
     key = models.CharField(max_length=128, unique=True)
     last_updated = models.DateTimeField(default=timezone.now)
     last_updated_by = models.CharField(
-        max_length=16, choices=UpdateChannel.choices(), default=UpdateChannel.UNKNOWN.value
+        max_length=16,
+        choices=UpdateChannel.choices(),
+        default=UpdateChannel.UNKNOWN.value,
+        db_default=UpdateChannel.UNKNOWN.value,
     )
 
     class Meta:
         abstract = True
 
-    value = PickledObjectField()
+    value = PickledObjectField(null=True)
 
     __repr__ = sane_repr("key", "value")
 

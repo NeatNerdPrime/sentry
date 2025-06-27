@@ -15,6 +15,7 @@ import {t, tct} from 'sentry/locale';
 import ConfigStore from 'sentry/stores/configStore';
 import {space} from 'sentry/styles/space';
 
+import type {FTCConsentLocation} from 'getsentry/types';
 import {loadStripe} from 'getsentry/utils/stripe';
 
 export type SubmitData = {
@@ -44,6 +45,10 @@ type Props = {
    */
   onSubmit: (data: SubmitData) => void;
   /**
+   * budget mode text for fine print, if any.
+   */
+  budgetModeText?: string;
+  /**
    * Text for the submit button.
    */
   buttonText?: string;
@@ -69,6 +74,10 @@ type Props = {
    */
   footerClassName?: string;
   /**
+   * Location of form, if any.
+   */
+  location?: FTCConsentLocation;
+  /**
    * Handler for cancellation.
    */
   onCancel?: () => void;
@@ -93,6 +102,8 @@ function CreditCardForm({
   cancelButtonText = t('Cancel'),
   footerClassName = 'form-actions',
   referrer,
+  location,
+  budgetModeText,
 }: Props) {
   const theme = useTheme();
   const [busy, setBusy] = useState(false);
@@ -120,18 +131,21 @@ function CreditCardForm({
     }
     const stripeElementStyles = {
       base: {
-        backgroundColor: theme.background,
-        color: theme.textColor,
+        backgroundColor: theme.isChonk
+          ? theme.tokens.background.primary
+          : theme.background,
+        color: theme.isChonk ? theme.tokens.content.primary : theme.textColor,
         fontFamily: theme.text.family,
         fontWeight: 400,
-        fontSize: theme.fontSizeLarge,
+        fontSize: theme.fontSize.lg,
         '::placeholder': {
-          color: theme.gray300,
+          color: theme.isChonk ? theme.tokens.content.muted : theme.gray300,
         },
+        iconColor: theme.isChonk ? theme.tokens.content.primary : theme.gray300,
       },
       invalid: {
-        color: theme.red300,
-        iconColor: theme.red300,
+        color: theme.isChonk ? theme.tokens.content.danger : theme.red300,
+        iconColor: theme.isChonk ? theme.tokens.content.danger : theme.red300,
       },
     };
 
@@ -231,6 +245,20 @@ function CreditCardForm({
               stripe: <ExternalLink href="https://stripe.com/" />,
             })}
           </small>
+          {location !== null && location !== undefined && (
+            <FinePrint>
+              {tct(
+                'By clicking [buttonText], you authorize Sentry to automatically charge you recurring subscription fees and applicable [budgetModeText] fees. Recurring charges occur at the start of your selected billing cycle for subscription fees and monthly for [budgetModeText] fees. You may cancel your subscription at any time [here:here].',
+                {
+                  buttonText: <b>{buttonText}</b>,
+                  budgetModeText,
+                  here: (
+                    <ExternalLink href="https://sentry.io/settings/billing/cancel/" />
+                  ),
+                }
+              )}
+            </FinePrint>
+          )}
         </Info>
 
         <div className={footerClassName}>
@@ -261,7 +289,11 @@ function CreditCardForm({
   );
 }
 
-const FormControl = Input.withComponent('div');
+const FormControl = styled(Input.withComponent('div'))`
+  /* Allow stripe form element to fill whatever height it needs to based
+   * on the config that we are providing it with. */
+  height: ${p => (p.theme.isChonk ? 'auto' : undefined)};
+`;
 
 const fieldCss = css`
   padding-right: 0;
@@ -271,12 +303,19 @@ const fieldCss = css`
 const StyledField = styled(FieldGroup)`
   ${fieldCss};
   padding-top: 0;
+  height: auto;
 `;
 
-const Info = styled('p')`
+const Info = styled('div')`
   ${fieldCss};
   margin-bottom: ${space(3)};
   margin-top: ${space(1)};
+`;
+
+const FinePrint = styled('div')`
+  margin-top: ${space(1)};
+  font-size: ${p => p.theme.fontSize.xs};
+  color: ${p => (p.theme.isChonk ? p.theme.tokens.content.muted : p.theme.gray300)};
 `;
 
 const CreditCardInfoWrapper = styled('div')<{isLoading?: boolean}>`

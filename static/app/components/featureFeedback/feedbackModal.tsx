@@ -46,7 +46,7 @@ const defaultFeedbackTypes = [
   t('Other reason'),
 ];
 
-export type ChildrenProps<T> = {
+type ChildrenProps<T> = {
   Body: (props: {
     children: React.ReactNode;
     showSelfHostedMessage?: boolean;
@@ -103,7 +103,7 @@ export function FeedbackModal<T extends Data>({
       ? ({subject: undefined, additionalInfo: undefined} as unknown as T)
       : props.initialData
   );
-  const isScreenSmall = useMedia(`(max-width: ${theme.breakpoints.small})`);
+  const isScreenSmall = useMedia(`(max-width: ${theme.breakpoints.sm})`);
 
   const project = useMemo(() => {
     if (projectsLoaded && location.query.project) {

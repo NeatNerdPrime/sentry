@@ -150,7 +150,7 @@ export function RelatedExceptions({
   newestFirst,
   onExceptionClick,
 }: ExceptionGroupContextProps) {
-  if (!mechanism || !mechanism.is_exception_group) {
+  if (!mechanism?.is_exception_group) {
     return null;
   }
 
@@ -179,8 +179,8 @@ export function RelatedExceptions({
 }
 
 const Heading = styled('div')`
-  font-weight: ${p => p.theme.fontWeightBold};
-  font-size: ${p => p.theme.fontSizeMedium};
+  font-weight: ${p => p.theme.fontWeight.bold};
+  font-size: ${p => p.theme.fontSize.md};
   margin: ${space(1)} 0 ${space(0.5)} 0;
   color: ${p => p.theme.subText};
 `;

@@ -51,15 +51,18 @@ const mockReplay = ReplayReader.factory({
 
 mockUseLoadReplayReader.mockImplementation(() => {
   return {
+    attachmentError: undefined,
     attachments: [],
     errors: [],
     fetchError: undefined,
-    fetching: false,
+    isError: false,
+    isPending: false,
     onRetry: jest.fn(),
     projectSlug: ProjectFixture().slug,
     replay: mockReplay,
     replayId: REPLAY_ID_1,
     replayRecord: ReplayRecordFixture({id: REPLAY_ID_1}),
+    status: 'success' as const,
   };
 });
 
@@ -122,6 +125,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       expect(
@@ -151,6 +155,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       await waitFor(() => {
@@ -172,23 +177,41 @@ describe('GroupReplays', () => {
         mockReplayUrl,
         expect.objectContaining({
           query: expect.objectContaining({
+            cursor: undefined,
+            dataset: undefined,
             environment: [],
-            field: [
+            field: expect.arrayContaining([
               'activity',
               'browser',
               'count_dead_clicks',
               'count_errors',
+              'count_infos',
               'count_rage_clicks',
+              'count_segments',
+              'count_urls',
+              'count_warnings',
+              'device',
+              'dist',
               'duration',
+              'environment',
+              'error_ids',
               'finished_at',
               'has_viewed',
               'id',
+              'info_ids',
               'is_archived',
               'os',
+              'platform',
               'project_id',
+              'releases',
+              'sdk',
               'started_at',
+              'tags',
+              'trace_ids',
+              'urls',
               'user',
-            ],
+              'warning_ids',
+            ]),
             per_page: 50,
             project: -1,
             queryReferrer: 'issueReplays',
@@ -220,6 +243,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       expect(
@@ -250,6 +274,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       expect(
@@ -283,6 +308,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       expect(
@@ -318,6 +344,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
@@ -387,6 +414,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       await waitFor(() => {
@@ -493,6 +521,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       expect(await screen.findByText('See Full Replay')).toBeInTheDocument();
@@ -567,6 +596,7 @@ describe('GroupReplays', () => {
       render(<GroupReplays />, {
         router,
         organization,
+        deprecatedRouterMocks: true,
       });
 
       await waitFor(() => {

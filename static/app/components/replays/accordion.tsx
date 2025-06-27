@@ -65,9 +65,10 @@ const AccordionContainer = styled('ul')`
 
 const ItemContainer = styled('div')`
   display: flex;
+  align-items: center;
   border-top: 1px solid ${p => p.theme.border};
   padding: ${space(1)} ${space(2)};
-  font-size: ${p => p.theme.fontSizeMedium};
+  font-size: ${p => p.theme.fontSize.md};
   column-gap: ${space(1.5)};
 `;
 

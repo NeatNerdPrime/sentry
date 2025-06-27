@@ -1,4 +1,6 @@
+from collections.abc import Mapping
 from datetime import datetime
+from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -18,6 +20,7 @@ from sentry.models.apikey import ApiKey
 from sentry.silo.base import FunctionSiloLimit, SiloMode
 from sentry.testutils.cases import APITestCase
 from sentry.testutils.helpers.options import override_options
+from sentry.testutils.helpers.response import close_streaming_response, is_streaming_response
 from sentry.testutils.outbox import outbox_runner
 from sentry.testutils.silo import all_silo_test, assume_test_silo_mode, create_test_regions
 from sentry.types.region import subdomain_is_region
@@ -55,24 +58,8 @@ class DummyErroringEndpoint(Endpoint):
     # class, so even though they're really meant to be instance attributes, we have to
     # add them here as class attributes first
     error: Exception = NotImplementedError()
-    handler_context_arg = None
-    scope_arg = None
-
-    def __init__(
-        self,
-        *args,
-        error: Exception,
-        handler_context_arg=None,
-        scope_arg=None,
-        **kwargs,
-    ):
-        # The error which will be thrown when a GET request is made
-        self.error = error
-        # The argumets which will be passed on to `Endpoint.handle_exception_with_details` via `super`
-        self.handler_context_arg = handler_context_arg
-        self.scope_arg = scope_arg
-
-        super().__init__(*args, **kwargs)
+    handler_context_arg: Mapping[str, Any] | None = None
+    scope_arg: Scope | None = None
 
     def get(self, request):
         raise self.error
@@ -506,8 +493,9 @@ class PaginateTest(APITestCase):
     def test_custom_response_type(self):
         response = _dummy_streaming_endpoint(self.make_request())
         assert response.status_code == 200
-        assert isinstance(response, StreamingHttpResponse)
+        assert is_streaming_response(response)
         assert response.has_header("content-type")
+        close_streaming_response(response)
 
 
 @all_silo_test(regions=create_test_regions("us", "eu"))
@@ -608,3 +596,32 @@ class SuperuserPermissionTest(APITestCase):
         response = self.superuser_or_any_permission_view(self.request)
 
         assert response.status_code == 200, response.content
+
+
+class RequestAccessTest(APITestCase):
+    """Tests for ensuring request.access is properly set before being accessed."""
+
+    def setUp(self):
+        super().setUp()
+        self.org = self.create_organization()
+        self.user = self.create_user()
+        self.create_member(user=self.user, organization=self.org)
+        self.request = self.make_request(user=self.user, method="GET")
+
+    def test_access_property_set_before_convert_args(self):
+        """Test that request.access is available during convert_args"""
+
+        class AccessUsingEndpoint(Endpoint):
+            permission_classes = ()
+
+            def convert_args(self, request, *args, **kwargs):
+                # This should not raise an AttributeError
+                assert request.access is not None
+                return (args, kwargs)
+
+            def get(self, request):
+                return Response({"ok": True})
+
+        response = AccessUsingEndpoint.as_view()(self.request)
+        assert response.status_code == 200
+        assert response.data == {"ok": True}

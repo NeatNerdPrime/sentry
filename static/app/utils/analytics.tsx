@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/react';
 
 import HookStore from 'sentry/stores/hookStore';
 import type {Hooks} from 'sentry/types/hooks';
+import {agentsInsightsEventMap} from 'sentry/utils/analytics/agentsInsightsAnalyticsEvents';
 import {
   alertsEventMap,
   type AlertsEventParameters,
@@ -16,6 +17,7 @@ import {
   type LogsAnalyticsEventParameters,
 } from 'sentry/utils/analytics/logsAnalyticsEvent';
 import {navigationAnalyticsEventMap} from 'sentry/utils/analytics/navigationAnalyticsEvents';
+import {nextJsInsightsEventMap} from 'sentry/utils/analytics/nextJsInsightsAnalyticsEvents';
 import {
   quickStartEventMap,
   type QuickStartEventParameters,
@@ -25,6 +27,8 @@ import {
   type StatsEventParameters,
 } from 'sentry/utils/analytics/statsAnalyticsEvents';
 
+import type {AgentMonitoringEventParameters} from './analytics/agentMonitoringAnalyticsEvents';
+import {agentMonitoringEventMap} from './analytics/agentMonitoringAnalyticsEvents';
 import type {CoreUIEventParameters} from './analytics/coreuiAnalyticsEvents';
 import {coreUIEventMap} from './analytics/coreuiAnalyticsEvents';
 import type {DashboardsEventParameters} from './analytics/dashboardsAnalyticsEvents';
@@ -79,6 +83,7 @@ import {workflowEventMap} from './analytics/workflowAnalyticsEvents';
 
 interface EventParameters
   extends GrowthEventParameters,
+    AgentMonitoringEventParameters,
     AlertsEventParameters,
     CoreUIEventParameters,
     DashboardsEventParameters,
@@ -111,6 +116,7 @@ interface EventParameters
     Record<string, Record<string, any>> {}
 
 const allEventMap: Record<string, string | null> = {
+  ...agentMonitoringEventMap,
   ...alertsEventMap,
   ...coreUIEventMap,
   ...dashboardsEventMap,
@@ -122,6 +128,8 @@ const allEventMap: Record<string, string | null> = {
   ...issueEventMap,
   ...laravelInsightsEventMap,
   ...monitorsEventMap,
+  ...nextJsInsightsEventMap,
+  ...agentsInsightsEventMap,
   ...performanceEventMap,
   ...tracingEventMap,
   ...profilingEventMap,
@@ -181,16 +189,6 @@ export const rawTrackAnalyticsEvent: Hooks['analytics:raw-track-event'] = (
   data,
   options
 ) => HookStore.get('analytics:raw-track-event').forEach(cb => cb(data, options));
-
-/**
- * This should be used to log when a `organization.experiments` experiment
- * variant is checked in the application.
- *
- * Refer for the backend implementation provided through HookStore for more
- * details.
- */
-export const logExperiment: Hooks['analytics:log-experiment'] = options =>
-  HookStore.get('analytics:log-experiment').forEach(cb => cb(options));
 
 type RecordMetric = Hooks['metrics:event'] & {
   endSpan: (opts: {

@@ -111,6 +111,7 @@ function PlanMigrationTable({subscription, migration}: Props) {
             )}
             hasCredits={hasErrorCredits}
           />
+          {/* TODO(data categories): BIL-955 */}
           {isAM3Migration
             ? nextPlan.reserved.spans && (
                 <PlanMigrationRow
@@ -251,7 +252,7 @@ function getNextDataCategoryValue(
   category: DataCategoryExact,
   subscription: Subscription
 ) {
-  const key = DATA_CATEGORY_INFO[category].plural;
+  const key = DATA_CATEGORY_INFO[category].plural as DataCategory;
   if (
     isAM3Migration &&
     subscription.planDetails.categories.includes(key) &&
@@ -317,7 +318,7 @@ const TableContainer = styled('div')`
 `;
 
 const Credits = styled('p')`
-  font-size: ${p => p.theme.fontSizeSmall};
+  font-size: ${p => p.theme.fontSize.sm};
   color: ${p => p.theme.subText};
 `;
 

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-import {Flex} from 'sentry/components/container/flex';
+import {Flex} from 'sentry/components/core/layout';
 import SeenInfo from 'sentry/components/group/seenInfo';
 import Version from 'sentry/components/version';
 import VersionHoverCard from 'sentry/components/versionHoverCard';
@@ -51,7 +51,7 @@ export default function FirstLastSeenSection({group}: {group: Group}) {
     : (allEnvironments?.lastSeen ?? lastSeen);
 
   return (
-    <Flex column gap={space(0.75)}>
+    <Flex direction="column" gap={space(0.75)}>
       <div>
         <Flex gap={space(0.5)}>
           <Title>{t('Last seen')}</Title>
@@ -64,7 +64,9 @@ export default function FirstLastSeenSection({group}: {group: Group}) {
             environment={shortEnvironmentLabel}
           />
         </Flex>
-        <ReleaseText project={group.project} release={groupReleaseData?.lastRelease} />
+        {lastSeen && (
+          <ReleaseText project={group.project} release={groupReleaseData?.lastRelease} />
+        )}
       </div>
       <div>
         <Flex gap={space(0.5)}>
@@ -78,7 +80,9 @@ export default function FirstLastSeenSection({group}: {group: Group}) {
             environment={shortEnvironmentLabel}
           />
         </Flex>
-        <ReleaseText project={group.project} release={groupReleaseData?.firstRelease} />
+        {group.firstSeen && (
+          <ReleaseText project={group.project} release={groupReleaseData?.firstRelease} />
+        )}
       </div>
     </Flex>
   );
@@ -119,10 +123,10 @@ const ReleaseWrapper = styled('span')`
 `;
 
 const Title = styled('div')`
-  font-weight: ${p => p.theme.fontWeightBold};
+  font-weight: ${p => p.theme.fontWeight.bold};
 `;
 
 const Subtitle = styled('div')`
-  font-size: ${p => p.theme.fontSizeSmall};
+  font-size: ${p => p.theme.fontSize.sm};
   color: ${p => p.theme.subText};
 `;

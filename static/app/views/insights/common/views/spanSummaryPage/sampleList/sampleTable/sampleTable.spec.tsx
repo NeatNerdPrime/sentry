@@ -5,7 +5,7 @@ import {
   waitForElementToBeRemoved,
 } from 'sentry-test/reactTestingLibrary';
 
-import {COL_WIDTH_UNDEFINED} from 'sentry/components/gridEditable';
+import {COL_WIDTH_UNDEFINED} from 'sentry/components/tables/gridEditable';
 import type {PageFilters} from 'sentry/types/core';
 import {ModuleName, SpanMetricsField} from 'sentry/views/insights/types';
 
@@ -238,7 +238,7 @@ const initializeMockRequests = () => {
           'span.self_time': 1.5,
           timestamp: '2023-05-21T19:30:06+00:00',
           span_id: 'span-id123',
-          'transaction.id': 'transaction-id123',
+          'transaction.span_id': 'transaction-id123',
         },
       ],
     },
