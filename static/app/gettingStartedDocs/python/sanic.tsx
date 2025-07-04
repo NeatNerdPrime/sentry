@@ -10,15 +10,18 @@ import {
   replayOnboardingJsLoader,
 } from 'sentry/gettingStartedDocs/javascript/jsLoader/jsLoader';
 import {
+  agentMonitoringOnboarding,
   crashReportOnboardingPython,
   featureFlagOnboarding,
 } from 'sentry/gettingStartedDocs/python/python';
 import {t, tct} from 'sentry/locale';
-import {getPythonProfilingOnboarding} from 'sentry/utils/gettingStartedDocs/python';
+import {
+  getPythonAiocontextvarsConfig,
+  getPythonInstallConfig,
+  getPythonProfilingOnboarding,
+} from 'sentry/utils/gettingStartedDocs/python';
 
 type Params = DocsParams;
-
-const getInstallSnippet = () => `pip install --upgrade 'sentry-sdk[sanic]'`;
 
 const getSdkSetupSnippet = (params: Params) => `from sanic import Sanic
 import sentry_sdk
@@ -46,24 +49,8 @@ const onboarding: OnboardingConfig = {
         }
       ),
       configurations: [
-        {
-          language: 'bash',
-          code: getInstallSnippet(),
-        },
-        {
-          description: (
-            <p>
-              {tct(
-                "If you're on Python 3.6, you also need the [code:aiocontextvars] package:",
-                {
-                  code: <code />,
-                }
-              )}
-            </p>
-          ),
-          language: 'bash',
-          code: 'pip install --upgrade aiocontextvars',
-        },
+        ...getPythonInstallConfig({packageName: 'sentry-sdk[sanic]'}),
+        ...getPythonAiocontextvarsConfig(),
       ],
     },
   ],
@@ -125,6 +112,7 @@ const docs: Docs = {
   featureFlagOnboarding,
   feedbackOnboardingJsLoader,
   profilingOnboarding: getPythonProfilingOnboarding({basePackage: 'sentry-sdk[sanic]'}),
+  agentMonitoringOnboarding,
 };
 
 export default docs;

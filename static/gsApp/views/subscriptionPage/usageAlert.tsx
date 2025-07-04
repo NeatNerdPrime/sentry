@@ -55,7 +55,7 @@ function UsageAlert({subscription, usage}: Props) {
     }
   }
 
-  function formatProjected(projected: number, category: string): string {
+  function formatProjected(projected: number, category: DataCategory): string {
     const displayName = getPlanCategoryName({
       plan: subscription.planDetails,
       category,
@@ -94,7 +94,7 @@ function UsageAlert({subscription, usage}: Props) {
           projectedWithReservedUnit > (currentHistory.prepaid ?? 0);
 
         if (hasOverage) {
-          acc.push(formatProjected(projected, category));
+          acc.push(formatProjected(projected, category as DataCategory));
         }
         return acc;
       },
@@ -172,7 +172,7 @@ function UsageAlert({subscription, usage}: Props) {
           acc.push(
             getPlanCategoryName({
               plan: subscription.planDetails,
-              category,
+              category: category as DataCategory,
               capitalize: false,
               hadCustomDynamicSampling: subscription.hadCustomDynamicSampling,
             })
@@ -291,7 +291,7 @@ const UsageInfo = styled('div')`
 `;
 
 const Description = styled(TextBlock)`
-  font-size: ${p => p.theme.fontSizeMedium};
+  font-size: ${p => p.theme.fontSize.md};
   color: ${p => p.theme.subText};
   margin-bottom: 0;
 `;

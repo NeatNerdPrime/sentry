@@ -2,13 +2,13 @@ import {css, useTheme} from '@emotion/react';
 import styled from '@emotion/styled';
 
 import {CopyToClipboardButton} from 'sentry/components/copyToClipboardButton';
+import {Link} from 'sentry/components/core/link';
+import {Tooltip} from 'sentry/components/core/tooltip';
 import GlobalSelectionLink from 'sentry/components/globalSelectionLink';
-import Link from 'sentry/components/links/link';
-import {Tooltip} from 'sentry/components/tooltip';
 import {useLocation} from 'sentry/utils/useLocation';
 import useOrganization from 'sentry/utils/useOrganization';
 import {formatVersion} from 'sentry/utils/versions/formatVersion';
-import {makeReleasesPathname} from 'sentry/views/releases/utils/pathnames';
+import {makeReleaseDrawerPathname} from 'sentry/views/releases/utils/pathnames';
 
 type Props = {
   /**
@@ -75,13 +75,12 @@ function Version({
   const renderVersion = () => {
     if (anchor && organization?.slug) {
       const props = {
-        to: {
-          pathname: makeReleasesPathname({
-            path: `/${encodeURIComponent(version)}/`,
-            organization,
-          }),
-          query: releaseDetailProjectId ? {project: releaseDetailProjectId} : undefined,
-        },
+        to: makeReleaseDrawerPathname({
+          location,
+          release: version,
+          projectId: releaseDetailProjectId,
+          source: 'release-version-link',
+        }),
         className,
       };
       if (preservePageFilters) {
@@ -132,7 +131,7 @@ function Version({
     }
 
     return css`
-      @media (min-width: ${theme.breakpoints.small}) {
+      @media (min-width: ${theme.breakpoints.sm}) {
         max-width: 500px;
       }
     `;
@@ -167,7 +166,10 @@ const truncateStyles = css`
   text-overflow: ellipsis;
 `;
 
-const VersionText = styled('span')<{shouldWrapText?: boolean; truncate?: boolean}>`
+const VersionText = styled('span')<{
+  shouldWrapText?: boolean;
+  truncate?: boolean;
+}>`
   ${p => p.truncate && truncateStyles}
   white-space: ${p => (p.shouldWrapText ? 'normal' : 'nowrap')};
 `;

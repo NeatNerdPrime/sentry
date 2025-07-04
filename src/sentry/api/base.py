@@ -186,7 +186,9 @@ class BaseEndpointMixin(abc.ABC):
     """
 
     @abc.abstractmethod
-    def create_audit_entry(self, request: Request, transaction_id=None, **kwargs):
+    def create_audit_entry(
+        self, request: Request, transaction_id=None, *, data: dict[str, Any], **kwargs
+    ):
         pass
 
     @abc.abstractmethod
@@ -330,8 +332,10 @@ class Endpoint(APIView):
 
         return response
 
-    def create_audit_entry(self, request: Request, transaction_id=None, **kwargs):
-        return create_audit_entry(request, transaction_id, audit_logger, **kwargs)
+    def create_audit_entry(
+        self, request: Request, transaction_id=None, *, data: dict[str, Any], **kwargs
+    ):
+        return create_audit_entry(request, transaction_id, audit_logger, data=data, **kwargs)
 
     def initialize_request(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Request:
         # XXX: Since DRF 3.x, when the request is passed into
@@ -400,6 +404,10 @@ class Endpoint(APIView):
 
                 self.initial(request, *args, **kwargs)
 
+                if getattr(request, "access", None) is None:
+                    # setup default access
+                    request.access = access.from_request(request)
+
                 # Get the appropriate handler method
                 assert request.method is not None
                 method = request.method.lower()
@@ -412,10 +420,6 @@ class Endpoint(APIView):
                     self.kwargs = kwargs
                 else:
                     handler = self.http_method_not_allowed
-
-                if getattr(request, "access", None) is None:
-                    # setup default access
-                    request.access = access.from_request(request)
 
             with sentry_sdk.start_span(
                 op="base.dispatch.execute",

@@ -11,11 +11,12 @@ from sentry.snuba import (
     metrics_performance,
     ourlogs,
     profiles,
-    spans_eap,
     spans_indexed,
     spans_metrics,
+    spans_rpc,
     transactions,
     uptime_checks,
+    uptime_results,
 )
 from sentry.snuba.models import QuerySubscription, SnubaQuery
 
@@ -28,10 +29,11 @@ DATASET_OPTIONS = {
     "metrics": metrics_performance,
     "ourlogs": ourlogs,
     "uptimeChecks": uptime_checks,
+    "uptime_results": uptime_results,
     "profiles": profiles,
     "issuePlatform": issue_platform,
     "profileFunctions": functions,
-    "spans": spans_eap,
+    "spans": spans_rpc,
     "spansIndexed": spans_indexed,
     "spansMetrics": spans_metrics,
     "transactions": transactions,

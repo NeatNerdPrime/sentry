@@ -1,8 +1,7 @@
 import moment from 'moment-timezone';
 
 import type {PromptData} from 'sentry/actionCreators/prompts';
-import {DATA_CATEGORY_INFO} from 'sentry/constants';
-import {DataCategory, type DataCategoryInfo} from 'sentry/types/core';
+import {DataCategory} from 'sentry/types/core';
 import type {Organization} from 'sentry/types/organization';
 import {defined} from 'sentry/utils';
 import getDaysSinceDate from 'sentry/utils/getDaysSinceDate';
@@ -26,7 +25,7 @@ import type {
   ProductTrial,
   Subscription,
 } from 'getsentry/types';
-import {PlanName, PlanTier} from 'getsentry/types';
+import {OnDemandBudgetMode, PlanName, PlanTier} from 'getsentry/types';
 import {isContinuousProfiling} from 'getsentry/utils/dataCategory';
 import titleCase from 'getsentry/utils/titleCase';
 import {displayPriceWithCents} from 'getsentry/views/amCheckout/utils';
@@ -135,7 +134,7 @@ type FormatOptions = {
  */
 export function formatReservedWithUnits(
   reservedQuantity: ReservedSku,
-  dataCategory: string,
+  dataCategory: DataCategory,
   options: FormatOptions = {
     isAbbreviated: false,
     useUnitScaling: false,
@@ -170,7 +169,7 @@ export function formatReservedWithUnits(
  */
 export function formatUsageWithUnits(
   usageQuantity = 0,
-  dataCategory: string,
+  dataCategory: DataCategory,
   options: FormatOptions = {isAbbreviated: false, useUnitScaling: false}
 ) {
   if (dataCategory === DataCategory.ATTACHMENTS) {
@@ -279,8 +278,8 @@ function displayNumber(n: number, fractionDigits = 0) {
 /**
  * Utility functions for Pricing Plans
  */
-export const isEnterprise = (subscription: Subscription) =>
-  ['e1', 'enterprise'].some(p => subscription.plan.startsWith(p));
+export const isEnterprise = (plan: string) =>
+  ['e1', 'enterprise'].some(p => plan.startsWith(p)) || isAmEnterprisePlan(plan);
 
 export const isTrialPlan = (plan: string) => TRIAL_PLANS.includes(plan);
 
@@ -330,14 +329,11 @@ export function isAm3DsPlan(planId?: string) {
 }
 
 export function isAmEnterprisePlan(planId?: string) {
-  return (
-    typeof planId === 'string' &&
-    planId.startsWith('am') &&
-    (planId.endsWith('_ent') ||
-      planId.endsWith('_ent_auf') ||
-      planId.endsWith('_ent_ds') ||
-      planId.endsWith('_ent_ds_auf'))
-  );
+  if (typeof planId !== 'string' || !isAmPlan(planId)) {
+    return false;
+  }
+
+  return planId.includes('_ent');
 }
 
 export function hasJustStartedPlanTrial(subscription: Subscription) {
@@ -367,6 +363,32 @@ export const displayBudgetName = (
     return titleCase(text);
   }
   return text;
+};
+
+/**
+ * Returns the configurable on-demand/PAYG categories for the given plan
+ * and budget mode.
+ *
+ * @param plan - The plan to get the on-demand/PAYG categories for
+ * @param budgetMode - The on-demand/PAYG budget mode
+ * @returns A list of the appropriate on-demand/PAYG categories for the given plan and budget mode
+ */
+export const getOnDemandCategories = ({
+  plan,
+  budgetMode,
+}: {
+  budgetMode: OnDemandBudgetMode | null;
+  plan: Plan;
+}) => {
+  if (budgetMode === OnDemandBudgetMode.PER_CATEGORY) {
+    return plan.onDemandCategories.filter(category => {
+      return Object.values(plan.availableReservedBudgetTypes).every(
+        budgetType => !budgetType.dataCategories.includes(category)
+      );
+    });
+  }
+
+  return plan.onDemandCategories;
 };
 
 export const displayPlanName = (plan?: Plan | null) => {
@@ -485,11 +507,17 @@ export function getBestActionToIncreaseEventLimits(
     return UsageAction.START_TRIAL;
   }
   // paid plans should add events without changing plans
-  if (isPaidPlan && hasPerformance(subscription.planDetails)) {
+  const hasAnyUsageExceeded = Object.values(subscription.categories).some(
+    category => category.usageExceeded
+  );
+  if (isPaidPlan && hasPerformance(subscription.planDetails) && hasAnyUsageExceeded) {
     return hasBillingPerms ? UsageAction.ADD_EVENTS : UsageAction.REQUEST_ADD_EVENTS;
   }
-  // otherwise, we want them to upgrade to a different plan
-  return hasBillingPerms ? UsageAction.SEND_TO_CHECKOUT : UsageAction.REQUEST_UPGRADE;
+  // otherwise, we want them to upgrade to a different plan if they're not already on a Business plan
+  if (!isBizPlanFamily(subscription.planDetails)) {
+    return hasBillingPerms ? UsageAction.SEND_TO_CHECKOUT : UsageAction.REQUEST_UPGRADE;
+  }
+  return '';
 }
 
 /**
@@ -642,15 +670,4 @@ export function partnerPlanEndingModalIsDismissed(
     default:
       return true;
   }
-}
-
-export function getCategoryInfoFromPlural(
-  category: DataCategory
-): DataCategoryInfo | null {
-  const categories = Object.values(DATA_CATEGORY_INFO);
-  const info = categories.find(c => c.plural === category);
-  if (!info) {
-    return null;
-  }
-  return info;
 }

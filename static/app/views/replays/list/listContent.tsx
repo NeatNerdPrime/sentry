@@ -1,23 +1,24 @@
-import {Fragment, useState} from 'react';
+import {Fragment} from 'react';
 import styled from '@emotion/styled';
 
 import {Button} from 'sentry/components/core/button';
 import LoadingIndicator from 'sentry/components/loadingIndicator';
-import ReplayRageClickSdkVersionBanner from 'sentry/components/replays/replayRageClickSdkVersionBanner';
 import {t} from 'sentry/locale';
 import {space} from 'sentry/styles/space';
 import {useHaveSelectedProjectsSentAnyReplayEvents} from 'sentry/utils/replays/hooks/useReplayOnboarding';
 import {MIN_DEAD_RAGE_CLICK_SDK} from 'sentry/utils/replays/sdkVersions';
 import useRouteAnalyticsParams from 'sentry/utils/routeAnalytics/useRouteAnalyticsParams';
+import {useLocalStorageState} from 'sentry/utils/useLocalStorageState';
 import useOrganization from 'sentry/utils/useOrganization';
 import usePageFilters from 'sentry/utils/usePageFilters';
 import useProjectSdkNeedsUpdate from 'sentry/utils/useProjectSdkNeedsUpdate';
 import DeadRageSelectorCards from 'sentry/views/replays/deadRageClick/deadRageSelectorCards';
 import useAllMobileProj from 'sentry/views/replays/detail/useAllMobileProj';
+import BulkDeleteAlert from 'sentry/views/replays/list/bulkDeleteAlert';
 import ReplaysFilters from 'sentry/views/replays/list/filters';
 import ReplayOnboardingPanel from 'sentry/views/replays/list/replayOnboardingPanel';
-import ReplaysList from 'sentry/views/replays/list/replaysList';
 import ReplaysSearch from 'sentry/views/replays/list/search';
+import ReplayIndexTable from 'sentry/views/replays/table/replayIndexTable';
 
 export default function ListContent() {
   const organization = useOrganization();
@@ -34,8 +35,14 @@ export default function ListContent() {
   });
 
   const {allMobileProj} = useAllMobileProj({replayPlatforms: true});
+  const [widgetIsOpen, setWidgetIsOpen] = useLocalStorageState(
+    `replay-dead-rage-widget-open`,
+    true
+  );
 
-  const [widgetIsOpen, setWidgetIsOpen] = useState(true);
+  const isLoading = hasSentReplays.fetching || rageClicksSdkVersion.isFetching;
+  const showDeadRageClickCards =
+    !rageClicksSdkVersion.needsUpdate && !allMobileProj && !isLoading;
 
   useRouteAnalyticsParams({
     hasSessionReplay,
@@ -43,18 +50,7 @@ export default function ListContent() {
     hasRageClickMinSDK: !rageClicksSdkVersion.needsUpdate,
   });
 
-  if (hasSentReplays.fetching || rageClicksSdkVersion.isFetching) {
-    return (
-      <Fragment>
-        <FiltersContainer>
-          <ReplaysFilters />
-          <ReplaysSearch />
-        </FiltersContainer>
-        <LoadingIndicator />
-      </Fragment>
-    );
-  }
-
+  // show onboarding
   if (!hasSessionReplay || !hasSentReplays.hasSentOneReplay) {
     return (
       <Fragment>
@@ -67,34 +63,24 @@ export default function ListContent() {
     );
   }
 
-  if (rageClicksSdkVersion.needsUpdate && !allMobileProj) {
-    return (
-      <Fragment>
-        <FiltersContainer>
-          <ReplaysFilters />
-          <ReplaysSearch />
-        </FiltersContainer>
-        <ReplayRageClickSdkVersionBanner />
-        <ReplaysList />
-      </Fragment>
-    );
-  }
-
   return (
     <Fragment>
+      {projects.length === 1 ? (
+        <BulkDeleteAlert projectId={String(projects[0] ?? '')} />
+      ) : null}
       <FiltersContainer>
         <ReplaysFilters />
         <SearchWrapper>
           <ReplaysSearch />
-          {!allMobileProj && (
+          {showDeadRageClickCards && (
             <Button onClick={() => setWidgetIsOpen(!widgetIsOpen)}>
               {widgetIsOpen ? t('Hide Widgets') : t('Show Widgets')}
             </Button>
           )}
         </SearchWrapper>
       </FiltersContainer>
-      {widgetIsOpen && !allMobileProj ? <DeadRageSelectorCards /> : null}
-      <ReplaysList />
+      {widgetIsOpen && showDeadRageClickCards ? <DeadRageSelectorCards /> : null}
+      {isLoading ? <LoadingIndicator /> : <ReplayIndexTable />}
     </Fragment>
   );
 }
@@ -107,6 +93,7 @@ const FiltersContainer = styled('div')`
 `;
 
 const SearchWrapper = styled(FiltersContainer)`
-  flex-grow: 1;
+  flex: 1;
+  min-width: 0;
   flex-wrap: nowrap;
 `;

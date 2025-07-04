@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.db.models import ProtectedError
 from django.utils import timezone
 
-from sentry.issues.grouptype import FeedbackGroup, ProfileFileIOGroupType
+from sentry.issues.grouptype import FeedbackGroup, ProfileFileIOGroupType, ReplayHydrationErrorType
 from sentry.models.group import Group, GroupStatus, get_group_with_redirect
 from sentry.models.groupredirect import GroupRedirect
 from sentry.models.grouprelease import GroupRelease
@@ -221,9 +221,9 @@ class GroupTest(TestCase, SnubaTestCase):
                 "http://testserver/organizations/org2/issues/42/?environment=dev",
             ),
             (
-                "\u00F6rg3",
+                "\u00f6rg3",
                 86,
-                {"env\u00EDronment": "d\u00E9v"},
+                {"env\u00edronment": "d\u00e9v"},
                 "http://testserver/organizations/org3/issues/86/?env%C3%ADronment=d%C3%A9v",
             ),
         ]:
@@ -267,6 +267,19 @@ class GroupTest(TestCase, SnubaTestCase):
 
         expected = f"http://{org.slug}.testserver/issues/{group.id}/"
         assert expected == group.get_absolute_url()
+
+    def test_get_absolute_api_url(self):
+        project = self.create_project()
+        event = self.store_event(
+            data={"fingerprint": ["group1"], "timestamp": self.min_ago}, project_id=project.id
+        )
+        org = self.organization
+        group = event.group
+
+        assert (
+            group.get_absolute_api_url()
+            == f"http://testserver/api/0/organizations/{org.slug}/issues/{group.id}/"
+        )
 
     def test_get_releases(self):
         now = timezone.now().replace(microsecond=0)
@@ -350,6 +363,29 @@ class GroupIsOverResolveAgeTest(TestCase):
         assert group.is_over_resolve_age() is True
         group.last_seen = timezone.now()
         assert group.is_over_resolve_age() is False
+
+    def test_respects_enable_auto_resolve_flag(self):
+        # Create a group and make it old enough to auto-resolve
+        group = self.group
+        group.last_seen = timezone.now() - timedelta(hours=2)
+        group.project.update_option("sentry:resolve_age", 1)  # 1 hour
+
+        # Test with a group type that has auto-resolve enabled
+        group.type = ReplayHydrationErrorType.type_id
+        group.save()
+
+        # Verify it would be auto-resolved
+        assert group.is_over_resolve_age() is True
+        assert group.get_status() == GroupStatus.RESOLVED
+
+        # Test with a group type that has auto-resolve disabled
+        group.type = FeedbackGroup.type_id
+        group.status = GroupStatus.UNRESOLVED  # Reset status
+        group.save()
+
+        # Verify it would NOT be auto-resolved, even though is_over_resolve_age is True
+        assert group.is_over_resolve_age() is True
+        assert group.get_status() == GroupStatus.UNRESOLVED
 
 
 class GroupGetLatestEventTest(TestCase, OccurrenceTestMixin):

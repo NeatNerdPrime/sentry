@@ -9,20 +9,19 @@ import {
 } from 'sentry/components/onboarding/gettingStartedDoc/step';
 import {
   type Docs,
-  DocsPageLocation,
   type DocsParams,
   type OnboardingConfig,
 } from 'sentry/components/onboarding/gettingStartedDoc/types';
 import {
+  agentMonitoringOnboarding,
   AlternativeConfiguration,
   crashReportOnboardingPython,
 } from 'sentry/gettingStartedDocs/python/python';
 import {t, tct} from 'sentry/locale';
 import {space} from 'sentry/styles/space';
+import {getPythonInstallConfig} from 'sentry/utils/gettingStartedDocs/python';
 
 type Params = DocsParams;
-
-const getInstallSnippet = () => `pip install --upgrade sentry-sdk`;
 
 const getSdkSetupSnippet = (params: Params) => `
 import sentry_sdk
@@ -72,24 +71,12 @@ sentry_sdk.init(
   ],
 )`;
 
-const installStep = (params: Params): StepProps => ({
+const installStep = (): StepProps => ({
   type: StepType.INSTALL,
-  description: tct('Install our Python SDK using [code:pip]:', {code: <code />}),
-  configurations: [
-    {
-      description:
-        params.docsLocation === DocsPageLocation.PROFILING_PAGE
-          ? tct(
-              'You need a minimum version [code:2.24.1] of the [code:sentry-python] SDK for the profiling feature.',
-              {
-                code: <code />,
-              }
-            )
-          : undefined,
-      language: 'bash',
-      code: getInstallSnippet(),
-    },
-  ],
+  description: tct('Install [code:sentry-sdk] from PyPI with the [code:django] extra:', {
+    code: <code />,
+  }),
+  configurations: getPythonInstallConfig(),
 });
 
 const configureStep = (params: Params): StepProps => ({
@@ -129,7 +116,7 @@ const onboarding: OnboardingConfig = {
         ),
       }
     ),
-  install: (params: Params) => [installStep(params)],
+  install: () => [installStep()],
   configure: (params: Params) => [
     configureStep(params),
     {
@@ -175,7 +162,7 @@ const onboarding: OnboardingConfig = {
 };
 
 const profilingOnboarding: OnboardingConfig = {
-  install: (params: Params) => [installStep(params)],
+  install: () => [installStep()],
   configure: (params: Params) => [configureStep(params)],
   verify: () => [],
 };
@@ -184,6 +171,7 @@ const docs: Docs = {
   onboarding,
   crashReportOnboarding: crashReportOnboardingPython,
   profilingOnboarding,
+  agentMonitoringOnboarding,
 };
 
 export default docs;

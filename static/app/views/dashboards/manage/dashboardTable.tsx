@@ -16,19 +16,20 @@ import {ActivityAvatar} from 'sentry/components/activity/item/avatar';
 import {openConfirmModal} from 'sentry/components/confirm';
 import {UserAvatar} from 'sentry/components/core/avatar/userAvatar';
 import {Button} from 'sentry/components/core/button';
+import {Link} from 'sentry/components/core/link';
 import EmptyStateWarning from 'sentry/components/emptyStateWarning';
 import GridEditable, {
   COL_WIDTH_UNDEFINED,
   type GridColumnOrder,
-} from 'sentry/components/gridEditable';
-import SortLink from 'sentry/components/gridEditable/sortLink';
-import Link from 'sentry/components/links/link';
+} from 'sentry/components/tables/gridEditable';
+import SortLink from 'sentry/components/tables/gridEditable/sortLink';
 import TimeSince from 'sentry/components/timeSince';
 import {IconCopy, IconDelete, IconStar} from 'sentry/icons';
 import {t} from 'sentry/locale';
 import {space} from 'sentry/styles/space';
 import type {Organization} from 'sentry/types/organization';
 import {trackAnalytics} from 'sentry/utils/analytics';
+import {useQueryClient} from 'sentry/utils/queryClient';
 import {decodeScalar} from 'sentry/utils/queryString';
 import withApi from 'sentry/utils/withApi';
 import EditAccessSelector from 'sentry/views/dashboards/editAccessSelector';
@@ -78,6 +79,7 @@ function FavoriteButton({
   dashboardId,
   onDashboardsChange,
 }: FavoriteButtonProps) {
+  const queryClient = useQueryClient();
   const [favorited, setFavorited] = useState(isFavorited);
   return (
     <Button
@@ -95,7 +97,13 @@ function FavoriteButton({
       onClick={async () => {
         try {
           setFavorited(!favorited);
-          await updateDashboardFavorite(api, organization.slug, dashboardId, !favorited);
+          await updateDashboardFavorite(
+            api,
+            queryClient,
+            organization.slug,
+            dashboardId,
+            !favorited
+          );
           onDashboardsChange();
           trackAnalytics('dashboards_manage.toggle_favorite', {
             organization,
@@ -331,7 +339,7 @@ function DashboardTable({
     <GridEditable
       data={dashboards ?? []}
       // necessary for edit access dropdown
-      bodyStyle={{overflow: 'visible'}}
+      bodyStyle={{overflow: 'scroll'}}
       columnOrder={columnOrder}
       columnSortBy={[]}
       grid={{
@@ -339,9 +347,6 @@ function DashboardTable({
         renderHeadCell: column => renderHeadCell(column),
         // favorite column
         renderPrependColumns: (isHeader: boolean, dataRow?: any) => {
-          if (!organization.features.includes('dashboards-favourite')) {
-            return [];
-          }
           const favoriteColumn = {
             key: ResponseKeys.FAVORITE,
             name: t('Favorite'),
@@ -361,9 +366,7 @@ function DashboardTable({
           }
           return [renderBodyCell(favoriteColumn, dataRow) as any];
         },
-        prependColumnWidths: organization.features.includes('dashboards-favourite')
-          ? ['max-content']
-          : [],
+        prependColumnWidths: ['max-content'],
       }}
       isLoading={isLoading}
       emptyMessage={
@@ -378,7 +381,7 @@ function DashboardTable({
 export default withApi(DashboardTable);
 
 const DateSelected = styled('div')`
-  font-size: ${p => p.theme.fontSizeMedium};
+  font-size: ${p => p.theme.fontSize.md};
   display: grid;
   grid-column-gap: ${space(1)};
   color: ${p => p.theme.textColor};

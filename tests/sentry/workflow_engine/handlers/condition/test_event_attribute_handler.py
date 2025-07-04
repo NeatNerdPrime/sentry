@@ -73,6 +73,11 @@ class TestEventAttributeCondition(ConditionTestCase):
                     "crash_type": "crash",
                 },
                 "os": {"distribution_name": "ubuntu", "distribution_version": "22.04"},
+                "ota_updates": {
+                    "channel": "production",
+                    "runtime_version": "1.0.0",
+                    "update_id": "123",
+                },
             },
             "threads": {
                 "values": [
@@ -91,6 +96,7 @@ class TestEventAttributeCondition(ConditionTestCase):
         self.group_event = self.event.for_group(self.group)
         self.event_data = WorkflowEventData(
             event=self.group_event,
+            group=self.group,
             group_state=GroupState(
                 {
                     "id": 1,
@@ -132,6 +138,21 @@ class TestEventAttributeCondition(ConditionTestCase):
         assert dc.comparison == {
             "match": MatchType.EQUAL,
             "value": "php",
+            "attribute": "platform",
+        }
+        assert dc.condition_result is True
+        assert dc.condition_group == dcg
+
+        payload = {
+            "id": EventAttributeCondition.id,
+            "match": MatchType.IS_SET,
+            "attribute": "platform",
+        }
+        dc = self.translate_to_data_condition(payload, dcg)
+
+        assert dc.type == self.condition
+        assert dc.comparison == {
+            "match": MatchType.IS_SET,
             "attribute": "platform",
         }
         assert dc.condition_result is True
@@ -188,6 +209,16 @@ class TestEventAttributeCondition(ConditionTestCase):
         self.dc.comparison.update(
             {"match": MatchType.EQUAL, "attribute": "platform", "value": 2000, "extra": "extra"}
         )
+        with pytest.raises(ValidationError):
+            self.dc.save()
+
+        self.dc.comparison.update(
+            {"match": MatchType.IS_SET, "attribute": "platform", "value": 2000}
+        )
+        with pytest.raises(ValidationError):
+            self.dc.save()
+
+        self.dc.comparison.update({"match": MatchType.EQUAL, "attribute": "asdf", "value": 2000})
         with pytest.raises(ValidationError):
             self.dc.save()
 
@@ -1103,6 +1134,70 @@ class TestEventAttributeCondition(ConditionTestCase):
                 "match": MatchType.EQUAL,
                 "attribute": "os.distribution_version",
                 "value": "20.04",
+            }
+        )
+        self.assert_does_not_pass(self.dc, self.event_data)
+
+    def test_ota_updates(self):
+        self.dc.comparison.update(
+            {
+                "match": MatchType.EQUAL,
+                "attribute": "ota_updates.channel",
+                "value": "production",
+            }
+        )
+        self.assert_passes(self.dc, self.event_data)
+
+        self.dc.comparison.update(
+            {
+                "match": MatchType.EQUAL,
+                "attribute": "ota_updates.channel",
+                "value": "development",
+            }
+        )
+        self.assert_does_not_pass(self.dc, self.event_data)
+
+        self.dc.comparison.update(
+            {
+                "match": MatchType.EQUAL,
+                "attribute": "ota_updates.runtime_version",
+                "value": "1.0.0",
+            }
+        )
+        self.assert_passes(self.dc, self.event_data)
+
+        self.dc.comparison.update(
+            {
+                "match": MatchType.EQUAL,
+                "attribute": "ota_updates.runtime_version",
+                "value": "2.0.0",
+            }
+        )
+        self.assert_does_not_pass(self.dc, self.event_data)
+
+        self.dc.comparison.update(
+            {
+                "match": MatchType.EQUAL,
+                "attribute": "ota_updates.update_id",
+                "value": "123",
+            }
+        )
+        self.assert_passes(self.dc, self.event_data)
+
+        self.dc.comparison.update(
+            {
+                "match": MatchType.EQUAL,
+                "attribute": "ota_updates.update_id",
+                "value": "876",
+            }
+        )
+        self.assert_does_not_pass(self.dc, self.event_data)
+
+        self.dc.comparison.update(
+            {
+                "match": MatchType.EQUAL,
+                "attribute": "ota_updates.non_existent",
+                "value": "876",
             }
         )
         self.assert_does_not_pass(self.dc, self.event_data)

@@ -60,7 +60,11 @@ const renderComponent = ({
   ProjectsStore.init();
   ProjectsStore.loadInitialData(projects);
 
-  return render(<TransactionReplays />, {router, organization});
+  return render(<TransactionReplays />, {
+    router,
+    organization,
+    deprecatedRouterMocks: true,
+  });
 };
 
 describe('TransactionReplays', () => {
@@ -155,7 +159,7 @@ describe('TransactionReplays', () => {
     await waitFor(() => {
       expect(replaysMockApi).toHaveBeenCalledTimes(1);
     });
-    expect(screen.getByText('There are no items to display')).toBeInTheDocument();
+    expect(screen.getByText('No replays found')).toBeInTheDocument();
   });
 
   it('should show loading indicator when loading replays', async () => {
@@ -247,10 +251,14 @@ describe('TransactionReplays', () => {
     expect(screen.getByText('06:40')).toBeInTheDocument();
 
     // Expect the first row to have the correct errors
-    expect(screen.getAllByTestId('replay-table-count-errors')[0]).toHaveTextContent('1');
+    expect(
+      screen.getAllByTestId('replay-table-column-count-errors')[0]
+    ).toHaveTextContent('1');
 
     // Expect the second row to have the correct errors
-    expect(screen.getAllByTestId('replay-table-count-errors')[1]).toHaveTextContent('4');
+    expect(
+      screen.getAllByTestId('replay-table-column-count-errors')[1]
+    ).toHaveTextContent('4');
 
     // Expect the first row to have the correct date
     expect(screen.getByText('14 days ago')).toBeInTheDocument();

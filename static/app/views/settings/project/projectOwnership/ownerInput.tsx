@@ -111,8 +111,7 @@ class OwnerInput extends Component<Props, State> {
           );
         } else if (
           error.status === 400 &&
-          error.responseJSON.raw &&
-          error.responseJSON.raw[0].startsWith('Invalid rule owners:')
+          error.responseJSON.raw?.[0].startsWith('Invalid rule owners:')
         ) {
           addErrorMessage(
             t(
@@ -272,12 +271,12 @@ const StyledTextArea = styled(TextArea)`
 
 const InvalidOwners = styled('div')`
   color: ${p => p.theme.error};
-  font-weight: ${p => p.theme.fontWeightBold};
+  font-weight: ${p => p.theme.fontWeight.bold};
   margin-top: 12px;
 `;
 
 const SyncDate = styled('div')`
-  font-weight: ${p => p.theme.fontWeightNormal};
+  font-weight: ${p => p.theme.fontWeight.normal};
   text-transform: none;
 `;
 

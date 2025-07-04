@@ -336,15 +336,15 @@ const HighlightColumn = styled(TreeColumn)`
 `;
 
 const HighlightContextContent = styled(ContextCardContent)`
-  font-size: ${p => p.theme.fontSizeSmall};
+  font-size: ${p => p.theme.fontSize.sm};
 `;
 
-export const highlightModalCss = (theme: Theme) => css`
+const highlightModalCss = (theme: Theme) => css`
   width: 850px;
   padding: 0 ${space(2)};
   margin: ${space(2)} 0;
   /* Disable overriding margins with breakpoint on default modal */
-  @media (min-width: ${theme.breakpoints.medium}) {
+  @media (min-width: ${theme.breakpoints.md}) {
     margin: ${space(2)} 0;
     padding: 0 ${space(2)};
   }

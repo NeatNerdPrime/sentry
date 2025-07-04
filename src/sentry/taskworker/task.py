@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from collections.abc import Callable, Collection, Mapping
+from collections.abc import Callable, Collection, Mapping, MutableMapping
 from functools import update_wrapper
 from typing import TYPE_CHECKING, Any, Generic, ParamSpec, TypeVar
 from uuid import uuid4
@@ -65,6 +65,10 @@ class Task(Generic[P, R]):
         return f"{self._namespace.name}:{self.name}"
 
     @property
+    def namespace(self) -> TaskNamespace:
+        return self._namespace
+
+    @property
     def retry(self) -> Retry | None:
         return self._retry
 
@@ -87,7 +91,7 @@ class Task(Generic[P, R]):
         self,
         args: Any | None = None,
         kwargs: Any | None = None,
-        headers: Mapping[str, Any] | None = None,
+        headers: MutableMapping[str, Any] | None = None,
         expires: int | datetime.timedelta | None = None,
         countdown: int | datetime.timedelta | None = None,
         **options: Any,
@@ -96,20 +100,24 @@ class Task(Generic[P, R]):
         Schedule a task to run later with a set of arguments.
 
         The provided parameters will be JSON encoded and stored within
-        a `TaskActivation` protobuf that is appended to kafka
+        a `TaskActivation` protobuf that is appended to kafka.
         """
         if args is None:
             args = []
         if kwargs is None:
             kwargs = {}
-        if settings.TASK_WORKER_ALWAYS_EAGER:
+
+        # Generate an activation even if we're in immediate mode to
+        # catch serialization errors in tests.
+        activation = self.create_activation(
+            args=args, kwargs=kwargs, headers=headers, expires=expires, countdown=countdown
+        )
+        if settings.TASKWORKER_ALWAYS_EAGER:
             self._func(*args, **kwargs)
         else:
             # TODO(taskworker) promote parameters to headers
             self._namespace.send_task(
-                self.create_activation(
-                    args=args, kwargs=kwargs, headers=headers, expires=expires, countdown=countdown
-                ),
+                activation,
                 wait_for_delivery=self.wait_for_delivery,
             )
 
@@ -117,7 +125,7 @@ class Task(Generic[P, R]):
         self,
         args: Collection[Any],
         kwargs: Mapping[Any, Any],
-        headers: Mapping[str, Any] | None = None,
+        headers: MutableMapping[str, Any] | None = None,
         expires: int | datetime.timedelta | None = None,
         countdown: int | datetime.timedelta | None = None,
     ) -> TaskActivation:
@@ -139,11 +147,13 @@ class Task(Generic[P, R]):
         if not headers:
             headers = {}
 
-        headers = {
-            "sentry-trace": sentry_sdk.get_traceparent() or "",
-            "baggage": sentry_sdk.get_baggage() or "",
-            **headers,
-        }
+        if headers.get("sentry-propagate-traces", True):
+            headers = {
+                "sentry-trace": sentry_sdk.get_traceparent() or "",
+                "baggage": sentry_sdk.get_baggage() or "",
+                **headers,
+            }
+
         # Monitor config is patched in by the sentry_sdk
         # however, taskworkers do not support the nested object,
         # nor do they use it when creating checkins.
@@ -151,7 +161,9 @@ class Task(Generic[P, R]):
             del headers["sentry-monitor-config"]
 
         for key, value in headers.items():
-            if not isinstance(value, (str, bytes, int, bool, float)):
+            if value is None or isinstance(value, (str, bytes, int, bool, float)):
+                headers[key] = str(value)
+            else:
                 raise ValueError(
                     "Only scalar header values are supported. "
                     f"The `{key}` header value is of type {type(value)}"

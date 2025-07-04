@@ -129,7 +129,7 @@ type RuleTaskResponse = {
 
 type RouteParams = {projectId?: string; ruleId?: string};
 
-export type IncompatibleRule = {
+type IncompatibleRule = {
   conditionIndices: number[] | null;
   filterIndices: number[] | null;
 };
@@ -1019,8 +1019,7 @@ class IssueRuleEditor extends DeprecatedAsyncComponent<Props, State> {
         []),
     ];
 
-    const environment =
-      !rule || !rule.environment ? ALL_ENVIRONMENTS_KEY : rule.environment;
+    const environment = rule?.environment ? rule.environment : ALL_ENVIRONMENTS_KEY;
 
     return (
       <FormField
@@ -1167,8 +1166,7 @@ class IssueRuleEditor extends DeprecatedAsyncComponent<Props, State> {
     } = this.state;
     const {actions, filters, conditions, frequency} = rule || {};
 
-    const environment =
-      !rule || !rule.environment ? ALL_ENVIRONMENTS_KEY : rule.environment;
+    const environment = rule?.environment ? rule.environment : ALL_ENVIRONMENTS_KEY;
 
     const canCreateAlert = hasEveryAccess(['alerts:write'], {organization, project});
     const disabled = loading || !(canCreateAlert || isActiveSuperuser());
@@ -1206,7 +1204,9 @@ class IssueRuleEditor extends DeprecatedAsyncComponent<Props, State> {
                 disabled={disabled}
                 priority="danger"
                 confirmText={t('Delete Rule')}
-                onConfirm={this.handleDeleteRule}
+                onConfirm={() => {
+                  this.handleDeleteRule();
+                }}
                 header={<h5>{t('Delete Alert Rule?')}</h5>}
                 message={t(
                   'Are you sure you want to delete "%s"? You won\'t be able to view the history of this alert once it\'s deleted.',
@@ -1611,12 +1611,12 @@ const ConditionsPanel = styled(Panel)`
 
 const StyledListItem = styled(ListItem)`
   margin: ${space(2)} 0 ${space(1)} 0;
-  font-size: ${p => p.theme.fontSizeExtraLarge};
+  font-size: ${p => p.theme.fontSize.xl};
 `;
 
 const StyledFieldHelp = styled(FieldHelp)`
   margin-top: 0;
-  @media (max-width: ${p => p.theme.breakpoints.small}) {
+  @media (max-width: ${p => p.theme.breakpoints.sm}) {
     margin-left: -${space(4)};
   }
 `;
@@ -1681,8 +1681,8 @@ const Badge = styled('span')`
   color: ${p => p.theme.white};
   text-transform: uppercase;
   text-align: center;
-  font-size: ${p => p.theme.fontSizeMedium};
-  font-weight: ${p => p.theme.fontWeightBold};
+  font-size: ${p => p.theme.fontSize.md};
+  font-weight: ${p => p.theme.fontWeight.bold};
   line-height: 1.5;
 `;
 
@@ -1692,7 +1692,7 @@ const EmbeddedWrapper = styled('div')`
 
 const EmbeddedSelectField = styled(SelectField)`
   padding: 0;
-  font-weight: ${p => p.theme.fontWeightNormal};
+  font-weight: ${p => p.theme.fontWeight.normal};
   text-transform: none;
 `;
 
@@ -1719,7 +1719,7 @@ const StyledField = styled(FieldGroup)`
 `;
 
 const StyledFieldWrapper = styled('div')`
-  @media (min-width: ${p => p.theme.breakpoints.small}) {
+  @media (min-width: ${p => p.theme.breakpoints.sm}) {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: ${space(1)};
@@ -1727,7 +1727,7 @@ const StyledFieldWrapper = styled('div')`
 `;
 
 const ContentIndent = styled('div')`
-  @media (min-width: ${p => p.theme.breakpoints.small}) {
+  @media (min-width: ${p => p.theme.breakpoints.sm}) {
     margin-left: ${space(4)};
   }
 `;
@@ -1737,7 +1737,7 @@ const AcknowledgeLabel = styled('label')`
   align-items: center;
   gap: ${space(1)};
   line-height: 2;
-  font-weight: ${p => p.theme.fontWeightNormal};
+  font-weight: ${p => p.theme.fontWeight.normal};
 `;
 
 const AcknowledgeField = styled(FieldGroup)`

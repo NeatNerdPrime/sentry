@@ -14,7 +14,7 @@ class TestIssuePriorityCondition(ConditionTestCase):
 
     def setUp(self):
         super().setUp()
-        self.event_data = WorkflowEventData(event=self.group_event)
+        self.event_data = WorkflowEventData(event=self.group_event, group=self.group_event.group)
         self.metric_alert = self.create_alert_rule()
         self.alert_rule_trigger_warning = self.create_alert_rule_trigger(
             alert_rule=self.metric_alert, label="warning"
@@ -36,6 +36,8 @@ class TestIssuePriorityCondition(ConditionTestCase):
         assert data_condition_critical_tuple is not None
         data_condition_warning = data_condition_warning_tuple[1]
         data_condition_critical = data_condition_critical_tuple[1]
+        data_condition_critical.type = Condition.ISSUE_PRIORITY_EQUALS
+        data_condition_warning.type = Condition.ISSUE_PRIORITY_EQUALS
 
         self.group.update(priority=PriorityLevel.MEDIUM)
         self.assert_passes(data_condition_warning, self.event_data)

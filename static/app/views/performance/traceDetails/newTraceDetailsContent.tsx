@@ -5,15 +5,15 @@ import omit from 'lodash/omit';
 import GuideAnchor from 'sentry/components/assistant/guideAnchor';
 import {Alert} from 'sentry/components/core/alert';
 import {ButtonBar} from 'sentry/components/core/button/buttonBar';
+import {Link} from 'sentry/components/core/link';
+import {Tooltip} from 'sentry/components/core/tooltip';
 import DiscoverButton from 'sentry/components/discoverButton';
 import EventVitals from 'sentry/components/events/eventVitals';
 import type {SpanDetailProps} from 'sentry/components/events/interfaces/spans/newTraceDetailsSpanDetails';
 import * as Layout from 'sentry/components/layouts/thirds';
 import ExternalLink from 'sentry/components/links/externalLink';
-import Link from 'sentry/components/links/link';
 import LoadingError from 'sentry/components/loadingError';
 import LoadingIndicator from 'sentry/components/loadingIndicator';
-import {Tooltip} from 'sentry/components/tooltip';
 import {IconPlay} from 'sentry/icons';
 import {t, tct, tn} from 'sentry/locale';
 import {space} from 'sentry/styles/space';
@@ -36,7 +36,7 @@ import {WEB_VITAL_DETAILS} from 'sentry/utils/performance/vitals/constants';
 import {VisuallyCompleteWithData} from 'sentry/utils/performanceForSentry';
 import {useApiQuery} from 'sentry/utils/queryClient';
 import {useNavigate} from 'sentry/utils/useNavigate';
-import Tags from 'sentry/views/discover/tags';
+import Tags from 'sentry/views/discover/results/tags';
 import Breadcrumb from 'sentry/views/performance/breadcrumb';
 import type {TraceTree} from 'sentry/views/performance/newTraceDetails/traceModels/traceTree';
 import {TraceShape} from 'sentry/views/performance/newTraceDetails/traceModels/traceTree';
@@ -471,7 +471,7 @@ const StyledLoadingIndicator = styled(LoadingIndicator)`
 `;
 
 const LoadingContainer = styled('div')`
-  font-size: ${p => p.theme.fontSizeLarge};
+  font-size: ${p => p.theme.fontSize.lg};
   color: ${p => p.theme.subText};
   text-align: center;
 `;

@@ -5,13 +5,13 @@ import * as Sentry from '@sentry/react';
 import type {Location, LocationDescriptorObject} from 'history';
 
 import {openModal} from 'sentry/actionCreators/modal';
+import {Link} from 'sentry/components/core/link';
+import {Tooltip} from 'sentry/components/core/tooltip';
 import GridEditable, {
   COL_WIDTH_MINIMUM,
   COL_WIDTH_UNDEFINED,
-} from 'sentry/components/gridEditable';
-import SortLink from 'sentry/components/gridEditable/sortLink';
-import Link from 'sentry/components/links/link';
-import {Tooltip} from 'sentry/components/tooltip';
+} from 'sentry/components/tables/gridEditable';
+import SortLink from 'sentry/components/tables/gridEditable/sortLink';
 import Truncate from 'sentry/components/truncate';
 import {IconStack} from 'sentry/icons';
 import {t} from 'sentry/locale';
@@ -66,13 +66,13 @@ import {makeReleasesPathname} from 'sentry/views/releases/utils/pathnames';
 
 import {QuickContextHoverWrapper} from './quickContext/quickContextWrapper';
 import {ContextType} from './quickContext/utils';
-import CellAction, {Actions, updateQuery} from './cellAction';
+import CellAction, {Actions, copyToClipBoard, updateQuery} from './cellAction';
 import ColumnEditModal, {modalCss} from './columnEditModal';
 import TableActions from './tableActions';
 import {TopResultsIndicator} from './topResultsIndicator';
 import type {TableColumn} from './types';
 
-export type TableViewProps = {
+type TableViewProps = {
   error: string | null;
   eventView: EventView;
   isFirstPage: boolean;
@@ -478,7 +478,7 @@ function TableView(props: TableViewProps) {
               onClick={() =>
                 trackAnalytics('profiling_views.go_to_flamegraph', {
                   organization,
-                  source: 'discover.table',
+                  source: 'discover.transactions_table',
                 })
               }
             >
@@ -623,6 +623,10 @@ function TableView(props: TableViewProps) {
 
           return;
         }
+        case Actions.COPY_TO_CLIPBOARD: {
+          copyToClipBoard(value);
+          break;
+        }
         default: {
           // Some custom perf metrics have units.
           // These custom perf metrics need to be adjusted to the correct value.
@@ -747,7 +751,7 @@ const StyledTooltip = styled(Tooltip)`
   max-width: max-content;
 `;
 
-export const StyledLink = styled(Link)`
+const StyledLink = styled(Link)`
   & div {
     display: inline;
   }
