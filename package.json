@@ -63,7 +63,7 @@
     "@rspack/core": "1.4.4",
     "@rspack/plugin-react-refresh": "1.4.3",
     "@sentry-internal/global-search": "^1.0.0",
-    "@sentry-internal/rrweb": "2.34.0",
+    "@sentry-internal/rrweb": "2.36.0",
     "@sentry-internal/rrweb-player": "2.34.0",
     "@sentry-internal/rrweb-snapshot": "2.34.0",
     "@sentry/core": "10.2.0",
