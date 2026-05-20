@@ -347,8 +347,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       diff:
-        specifier: 8.0.3
-        version: 8.0.3
+        specifier: 9.0.0
+        version: 9.0.0
       dompurify:
         specifier: 3.4.2
         version: 3.4.2
@@ -3944,6 +3944,7 @@ packages:
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+    deprecated: Potential CWE-502 - Update to 1.3.1 or higher
 
   '@unrs/resolver-binding-darwin-arm64@1.7.13':
     resolution: {integrity: sha512-LIKeCzNSkTWwGHjtiUIfvS96+7kpuyrKq2pzw/0XT2S8ykczj40Hh27oLTbXguCX8tGrCoaD2yXxzwqMMhAzhA==}
@@ -4483,8 +4484,8 @@ packages:
   caniuse-lite@1.0.30001760:
     resolution: {integrity: sha512-7AAMPcueWELt1p3mi13HR/LHH0TJLT11cnwDJEs3xA4+CK/PLKeO9Kl1oru24htkyUKtkGCvAx4ohB0Ttry8Dw==}
 
-  caniuse-lite@1.0.30001791:
-    resolution: {integrity: sha512-yk0l/YSrOnFZk3UROpDLQD9+kC1l4meK/wed583AXrzoarMGJcbRi2Q4RaUYbKxYAsZ8sWmaSa/DsLmdBeI1vQ==}
+  caniuse-lite@1.0.30001792:
+    resolution: {integrity: sha512-hVLMUZFgR4JJ6ACt1uEESvQN1/dBVqPAKY0hgrV70eN3391K6juAfTjKZLKvOMsx8PxA7gsY1/tLMMTcfFLLpw==}
 
   cbor2@1.12.0:
     resolution: {integrity: sha512-3Cco8XQhi27DogSp9Ri6LYNZLi/TBY/JVnDe+mj06NkBjW/ZYOtekaEU4wZ4xcRMNrFkDv8KNtOAqHyDfz3lYg==}
@@ -5007,8 +5008,8 @@ packages:
     resolution: {integrity: sha512-vtcDfH3TOjP8UekytvnHH1o1P4FcUdt4eQ1Y+Abap1tk/OB2MWQvcwS2ClCd1zuIhc3JKOx6p3kod8Vfys3E+A==}
     engines: {node: '>=0.3.1'}
 
-  diff@8.0.3:
-    resolution: {integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==}
+  diff@9.0.0:
+    resolution: {integrity: sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw==}
     engines: {node: '>=0.3.1'}
 
   dir-glob@3.0.1:
@@ -5115,8 +5116,8 @@ packages:
   electron-to-chromium@1.5.313:
     resolution: {integrity: sha512-QBMrTWEf00GXZmJyx2lbYD45jpI3TUFnNIzJ5BBc8piGUDwMPa1GV6HJWTZVvY/eiN3fSopl7NRbgGp9sZ9LTA==}
 
-  electron-to-chromium@1.5.349:
-    resolution: {integrity: sha512-QsWVGyRuY07Aqb234QytTfwd5d9AJlfNIQ5wIOl1L+PZDzI9d9+Fn0FRale/QYlFxt/bUnB0/nLd1jFPGxGK1A==}
+  electron-to-chromium@1.5.351:
+    resolution: {integrity: sha512-9D7Iqx8RImSvCnOsj86rCH6eQjZFQoM04Jn6HnZVM0Nu/G58/gmKYQ1d12MZTbjQbQSTGI8nwEy07ErsA2slLA==}
 
   emittery@0.13.1:
     resolution: {integrity: sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==}
@@ -13687,8 +13688,8 @@ snapshots:
   browserslist@4.28.2:
     dependencies:
       baseline-browser-mapping: 2.10.27
-      caniuse-lite: 1.0.30001791
-      electron-to-chromium: 1.5.349
+      caniuse-lite: 1.0.30001792
+      electron-to-chromium: 1.5.351
       node-releases: 2.0.38
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
@@ -13758,7 +13759,7 @@ snapshots:
 
   caniuse-lite@1.0.30001760: {}
 
-  caniuse-lite@1.0.30001791: {}
+  caniuse-lite@1.0.30001792: {}
 
   cbor2@1.12.0: {}
 
@@ -14201,7 +14202,7 @@ snapshots:
 
   diff@5.2.2: {}
 
-  diff@8.0.3: {}
+  diff@9.0.0: {}
 
   dir-glob@3.0.1:
     dependencies:
@@ -14320,7 +14321,7 @@ snapshots:
 
   electron-to-chromium@1.5.313: {}
 
-  electron-to-chromium@1.5.349: {}
+  electron-to-chromium@1.5.351: {}
 
   emittery@0.13.1: {}
 
